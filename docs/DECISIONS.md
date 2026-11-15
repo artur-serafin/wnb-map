@@ -20,3 +20,7 @@ Format: data – decyzja – powód – rozważane alternatywy
   Strona: trzy progi komunikatu (2–8 min: „Ostatnia pozycja X min temu, Organizator prawdopodobnie stoi“, 8–15 min: „Brak sygnału od Organizatora“ (znacznik szary), >15 min: „Udostępnianie pozycji zakończone“ + znacznik znika, zostaje trasa).
   Ogon liczony względem ostatniego punktu, nie czasu bieżącego.
   Koniec udostępniania = brak danych >15 min.
+- 2026-11-15 – Mapa: Leaflet, trasa z GPX (<trk>), tytuł z <name>, duplikaty
+  punktów usuwane przy wczytaniu. Trasa celowo rysowana ręcznie i nie zawsze
+  po ulicach: wyświetlamy 1:1 jak w pliku, bez snappingu. Test na telefonie OK.
+  Otwarte: źródło kafelków dla 130 osób (OSM standardowe nie nadaje się na produkcję).
