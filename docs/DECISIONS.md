@@ -16,6 +16,7 @@ Format: data – decyzja – powód – rozważane alternatywy
   OwnTracks odłożony jako plan B.
 - 2026-11-15 – Traccar Client zatwierdzony (test 2h14m, 614 pkt): jazda co 6–8 s,
   opóźnienie ≤5 s, bateria ok. 7 pp/h, postój = heartbeat co ok. 5 min.
-  Ustawienia: High, Distance 25 m, Stop detection i heartbeat włączone.
-  Strona: dwa progi komunikatu (>2 min „stoi?", >8 min „brak sygnału").
+  Ustawienia: High, Distance 25 m, Stop detection wyłączone, Accuracy High, Distance 25 m, heartbeat nieustawiany (domyślny, ok. 5 min).
+  Strona: trzy progi komunikatu (2–8 min: „Ostatnia pozycja X min temu, Organizator prawdopodobnie stoi“, 8–15 min: „Brak sygnału od Organizatora“ (znacznik szary), >15 min: „Udostępnianie pozycji zakończone“ + znacznik znika, zostaje trasa).
   Ogon liczony względem ostatniego punktu, nie czasu bieżącego.
+  Koniec udostępniania = brak danych >15 min.
