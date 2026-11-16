@@ -29,3 +29,8 @@ Format: data – decyzja – powód – rozważane alternatywy
   jako pole gap). Wrócimy do tego po teście terenowym, mając w logu prawdziwe
   heartbeaty. Na razie: Postój = ostatnia prędkość < STILL_SPEED_KMH.
   STOP_AFTER_SECONDS zmieniony na 90.
+- 2026-11-15 – Test obciążeniowy OVH Personal (k6, 6 min, 150-200 odczytów co 8 s
+  + zapis co 5 s): 0 błędów HTTP, p95 odczytu 53 ms, zapisu 77 ms, max 176 ms.
+  Hosting OVH ZATWIERDZONY. Zaobserwowano 1 niepoprawny odczyt na 6898
+  (hipoteza: wyścig odczytu z podmianą pliku). Do dodania w stronie:
+  tolerancja pojedynczego nieudanego odczytu (komunikat dopiero po 2 z rzędu).
