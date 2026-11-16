@@ -24,3 +24,8 @@ Format: data – decyzja – powód – rozważane alternatywy
   punktów usuwane przy wczytaniu. Trasa celowo rysowana ręcznie i nie zawsze
   po ulicach: wyświetlamy 1:1 jak w pliku, bez snappingu. Test na telefonie OK.
   Otwarte: źródło kafelków dla 130 osób (OSM standardowe nie nadaje się na produkcję).
+- 2026-11-15 – Odłożone: "Postój" potwierdzany heartbeatem (prędkość < progu
+  ORAZ odstęp od poprzedniego punktu >= ok. 270 s, liczony w ingest i zapisany
+  jako pole gap). Wrócimy do tego po teście terenowym, mając w logu prawdziwe
+  heartbeaty. Na razie: Postój = ostatnia prędkość < STILL_SPEED_KMH.
+  STOP_AFTER_SECONDS zmieniony na 90.
