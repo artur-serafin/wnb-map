@@ -34,3 +34,6 @@ Format: data – decyzja – powód – rozważane alternatywy
   Hosting OVH ZATWIERDZONY. Zaobserwowano 1 niepoprawny odczyt na 6898
   (hipoteza: wyścig odczytu z podmianą pliku). Do dodania w stronie:
   tolerancja pojedynczego nieudanego odczytu (komunikat dopiero po 2 z rzędu).
+- 2026-11-16 – Test skoku (k6, 400 wejść: 200 w 20 s + 200 jednocześnie):
+  0 błędów, p95 187 ms, max 364 ms. Trzy testy obciążeniowe zaliczone,
+  OVH Personal zostaje jako hosting produkcyjny. Otwarte: źródło map.
