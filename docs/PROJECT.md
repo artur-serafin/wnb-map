@@ -42,3 +42,4 @@ także w tle.
 
 ## Odnośniki
 - DECISIONS.md – dziennik decyzji
+- BACKLOG.md – lista zadań i stan prac
