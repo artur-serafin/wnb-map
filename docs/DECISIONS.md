@@ -37,3 +37,9 @@ Format: data – decyzja – powód – rozważane alternatywy
 - 2026-11-16 – Test skoku (k6, 400 wejść: 200 w 20 s + 200 jednocześnie):
   0 błędów, p95 187 ms, max 364 ms. Trzy testy obciążeniowe zaliczone,
   OVH Personal zostaje jako hosting produkcyjny. Otwarte: źródło map.
+- 2026-11-16 – Mapa: zostajemy przy kafelkach OSM (tile.openstreetmap.org),
+  skala do ok. 50 osób jednocześnie. Wymagania polityki OSM: atrybucja z linkiem,
+  Referer, brak prefetchu/offline, brak SLA i możliwa blokada bez uprzedzenia.
+  Plan awaryjny: zmiana TILE_URL w config.js (PMTiles na OVH jako gotowa
+  alternatywa; hosting potwierdzony na żądania zakresowe). "Tryb offline" z fazy 10
+  wymaga własnych kafelków.
