@@ -43,3 +43,8 @@ Format: data – decyzja – powód – rozważane alternatywy
   Plan awaryjny: zmiana TILE_URL w config.js (PMTiles na OVH jako gotowa
   alternatywa; hosting potwierdzony na żądania zakresowe). "Tryb offline" z fazy 10
   wymaga własnych kafelków.
+- 2026-11-17 – Strona: menu (hamburger) z wyborem języka PL/EN i informacją o
+  prywatności; teksty w lang/pl.json i lang/en.json; tolerancja pojedynczego
+  błędu odczytu (FAIL_AFTER_POLLS=2). Leaflet zostaje na cdnjs (własna kopia
+  odłożona). Dostępność kafelków OSM nie jest priorytetem. Wybór adresu
+  docelowego na sam koniec.
