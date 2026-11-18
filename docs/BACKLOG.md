@@ -1,6 +1,6 @@
 # Backlog – mapa przejazdu rolkowego
 
-Stan na 2026-11-18. Odhaczanie: w GitHubie otwórz plik (ikona ołówka), zmień `[ ]` na `[x]`, zatwierdź zmianę (Commit changes).
+Stan na 2026-11-18 (po zamknięciu bloku B). Odhaczanie: w GitHubie otwórz plik (ikona ołówka), zmień `[ ]` na `[x]`, zatwierdź zmianę (Commit changes).
 
 Priorytety: **M** = musi być przed wdrożeniem, **S** = powinno być, **N** = do rozważenia, można po wdrożeniu.
 „Kto": **C** = Claude przygotowuje pliki, **A** = Artur wgrywa/testuje/decyduje.
@@ -28,20 +28,21 @@ Priorytety: **M** = musi być przed wdrożeniem, **S** = powinno być, **N** = d
 - [x] A2 Atrybucja OSM z linkiem
 - [x] A3 Pliki językowe PL/EN, wybór języka z ustawień telefonu i przełącznik w menu
 - [x] A4 Informacja o prywatności w menu (hamburger); wersja przetestowana na telefonie
+- [x] B1–B3: produkcyjny `ingest` (POST, walidacja, przełącznik logu `LOG_REQUESTS`, zapis atomowy, 500 przy błędzie zapisu), wzorzec bez sekretu w repozytorium (`server/ingest-ZMIEN-MNIE.php`), `.htaccess` (brak listingu katalogów, blokada `*.lock`/`*.tmp`/`*.log`, `nosniff`, `no-cache` dla `latest.json`); sprawdzone na serwerze testowym
 
-## Blok B: serwer (następny do zrobienia)
+## Blok B: serwer (zamknięty)
 
-- [ ] **B1 (M, C)** Wersja produkcyjna `ingest`: usunięcie surowego logu, walidacja danych, nowy długi sekret (min. 24 znaki)
-- [ ] **B2 (M, C+A)** Sekret poza repozytorium: w repo tylko wzorzec `server/ingest-ZMIEN-MNIE.php`, prawdziwa nazwa pliku wyłącznie na serwerze
-- [ ] **B3 (M, C)** `.htaccess`: wyłączenie listingu katalogów, blokada plików roboczych (`.lock`, `.tmp`, `log/`), poprawny typ `application/json` dla `latest.json`
-- [ ] **B4 (S, C)** Procedura zmiany sekretu (zmiana nazwy pliku + nowy adres w Traccar) na wypadek wycieku
-- [ ] **B5 (N, C)** Odrzucanie punktów o bardzo słabej dokładności (np. > 100 m), żeby znacznik nie „skakał" na starcie
+- [x] **B1 (M, C)** Wersja produkcyjna `ingest`: usunięcie surowego logu, walidacja danych, nowy długi sekret (min. 24 znaki)
+- [x] **B2 (M, C+A)** Sekret poza repozytorium: w repo tylko wzorzec `server/ingest-ZMIEN-MNIE.php`, prawdziwa nazwa pliku wyłącznie na serwerze
+- [x] **B3 (M, C)** `.htaccess`: wyłączenie listingu katalogów, blokada plików roboczych (`.lock`, `.tmp`, `log/`), poprawny typ `application/json` dla `latest.json`
+- [ ] **B4 (S, C)** Procedura zmiany sekretu (zmiana nazwy pliku + nowy adres w Traccar) na wypadek wycieku; to dokumentacja, trafia do `RUNBOOK.md` (D1)
+- [ ] **B5 (N, C)** Odrzucanie punktów o bardzo słabej dokładności (np. > 100 m), żeby znacznik nie „skakał" na starcie; decyzja po teście terenowym (E2), gdy zobaczymy dane
 
 ## Blok C: środowisko i wdrożenie
 
 - [ ] **C2 (M, C+A)** Struktura produkcyjna katalogów (strona, `data/`, `live/`, `lang/`, `ingest`) i przeniesienie z `wnb-test`
 - [ ] **C3 (M, A)** Zmiana adresu w Traccar Client na produkcyjny `ingest`
-- [ ] **C4 (M, A)** Kod strony i pliki serwera w repozytorium GitHub (poza sekretem): `index.html`, `config.js`, `lang/`, `server/`
+- [ ] **C4 (M, A)** Kod strony i pliki serwera w repozytorium GitHub (poza sekretem): `index.html`, `config.js`, `lang/`, `server/`, `.htaccess`
 - [ ] **C5 (M, A)** Sprzątanie środowiska testowego: usunięcie `log-….php`, `requests.log`, folderu `wnb-test`
 - [ ] **C6 (N, A)** Automatyczne wdrażanie z GitHuba na OVH (GitHub Actions); na MVP wystarczy ręczny FTP
 - [ ] **C1 (M, A) – NA KONIEC** Wybór adresu docelowego (domena/subdomena/katalog) i certyfikat HTTPS; decyzja po poprawkach, dyskusjach i testach
