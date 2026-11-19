@@ -72,6 +72,17 @@ Kolejność: F1 → F7. F4 jest podstawą dla F5. Brak zmian po stronie serwera:
 - [x] **F6 (S, C)** Wskaźnik kierunku do WnB, gdy jego znacznik jest poza ekranem: poświata przy brzegu/rogu mapy w stronę WnB, w kolorze znacznika WnB (szara przy braku sygnału, brak po zakończeniu udostępniania); znika, gdy znacznik WnB jest widoczny na ekranie. Do ustalenia po podglądzie na telefonie: intensywność, ewentualny napis z odległością (np. „1,2 km")
 - [x] **F7 (S, C)** Kierunek ruchu Uczestnika: stożek/strzałka przy niebieskiej kropce na podstawie kierunku ruchu z lokalizacji (`heading`), pokazywana tylko podczas jazdy (próg prędkości w `config.js`); bez kompasu telefonu, bo wymaga dodatkowej zgody i nie działa, gdy telefon jest w kieszeni. Dostępność kierunku na iPhonie do potwierdzenia w terenie. Kierunek patrzenia z kompasu telefonu, gdy Uczestnik stoi (iPhone: zgoda po dotknięciu „Moja pozycja"; poprawka deklinacji w `config.js`); do potwierdzenia w terenie
 
+## Blok G: wgrywanie i usuwanie trasy
+
+- [x] **G1 (M, C)** Strona: brak trasy to stan celowy (404): bez komunikatu i błędu, bez POI, ETA, kilometra po dotknięciu i przycisku „Cała trasa"; pozycja WnB działa; opcjonalny `NO_ROUTE_TITLE`
+- [ ] **G3 (M, C+A)** `upload-<sekret>.php`: formularz (GPX + opcjonalnie `poi.json`, przycisk usunięcia), nowy GPX bez nowych POI usuwa stare POI, walidacja przed podmianą, zapis atomowy, jedna kopia poprzedniej wersji (`.prev`), potwierdzenie (tytuł, długość, liczba punktów); wzorzec w repozytorium `server/upload-ZMIEN-MNIE.php`, sekret tylko na serwerze
+- [ ] **G4 (S, C)** `.htaccess`: blokada plików `.prev`
+- [ ] **G5 (S, C)** Procedura wgrywania trasy w `RUNBOOK.md` (eksport z MapMyRun, wgranie z telefonu, kontrola, przywrócenie poprzedniej wersji)
+- [ ] (opcja) Dodatkowy PIN w formularzu wgrywania
+- [ ] (opcja) Wyśrodkowanie mapy na WnB, gdy nie ma trasy
+
+Odrzucone: wykrywanie zmiany trasy na otwartych stronach (nowa trasa po odświeżeniu wystarcza).
+
 ## Świadomie odłożone (wracamy po wdrożeniu lub po teście terenowym)
 
 - [ ] **Postój potwierdzany heartbeatem:** „Postój" tylko gdy prędkość < progu ORAZ odstęp od poprzedniego punktu ≥ ok. 270 s (pole `gap` liczone w `ingest`, nowe ustawienie `HEARTBEAT_MIN_GAP_SECONDS`); wrócić po teście terenowym z prawdziwymi heartbeatami
