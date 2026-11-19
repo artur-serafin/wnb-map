@@ -75,11 +75,9 @@ Kolejność: F1 → F7. F4 jest podstawą dla F5. Brak zmian po stronie serwera:
 ## Blok G: wgrywanie i usuwanie trasy
 
 - [x] **G1 (M, C)** Strona: brak trasy to stan celowy (404): bez komunikatu i błędu, bez POI, ETA, kilometra po dotknięciu i przycisku „Cała trasa"; pozycja WnB działa; opcjonalny `NO_ROUTE_TITLE`
-- [ ] **G3 (M, C+A)** `upload-<sekret>.php`: formularz (GPX + opcjonalnie `poi.json`, przycisk usunięcia), nowy GPX bez nowych POI usuwa stare POI, walidacja przed podmianą, zapis atomowy, jedna kopia poprzedniej wersji (`.prev`), potwierdzenie (tytuł, długość, liczba punktów); wzorzec w repozytorium `server/upload-ZMIEN-MNIE.php`, sekret tylko na serwerze
-- [ ] **G4 (S, C)** `.htaccess`: blokada plików `.prev`
+- [x] **G3 (M, C+A)** `upload-<sekret>.php`: formularz (GPX + opcjonalnie `poi.json`, przycisk usunięcia), nowy GPX bez nowych POI usuwa stare POI, walidacja przed podmianą, zapis atomowy, jedna kopia poprzedniej wersji (`.prev`), potwierdzenie (tytuł, długość, liczba punktów); wzorzec w repozytorium `server/upload-ZMIEN-MNIE.php`, sekret tylko na serwerze
+- [x] **G4 (S, C)** `.htaccess`: blokada plików `.prev`
 - [ ] **G5 (S, C)** Procedura wgrywania trasy w `RUNBOOK.md` (eksport z MapMyRun, wgranie z telefonu, kontrola, przywrócenie poprzedniej wersji)
-- [ ] (opcja) Dodatkowy PIN w formularzu wgrywania
-- [ ] (opcja) Wyśrodkowanie mapy na WnB, gdy nie ma trasy
 
 Odrzucone: wykrywanie zmiany trasy na otwartych stronach (nowa trasa po odświeżeniu wystarcza).
 
