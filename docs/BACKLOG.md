@@ -42,16 +42,16 @@ Priorytety: **M** = musi być przed wdrożeniem, **S** = powinno być, **N** = d
 
 - [ ] **C2 (M, C+A)** Struktura produkcyjna katalogów (strona, `data/`, `live/`, `lang/`, `ingest`) i przeniesienie z `wnb-test`
 - [ ] **C3 (M, A)** Zmiana adresu w Traccar Client na produkcyjny `ingest`
-- [ ] **C4 (M, A)** Kod strony i pliki serwera w repozytorium GitHub (poza sekretem): `index.html`, `config.js`, `lang/`, `server/`, `.htaccess`
+- [x] **C4 (M, A)** Kod strony i pliki serwera w repozytorium GitHub (poza sekretem): `index.html`, `config.js`, `lang/`, `server/`, `.htaccess`
 - [ ] **C5 (M, A)** Sprzątanie środowiska testowego: usunięcie `log-….php`, `requests.log`, folderu `wnb-test`
 - [ ] **C6 (N, A)** Automatyczne wdrażanie z GitHuba na OVH (GitHub Actions); na MVP wystarczy ręczny FTP
 - [ ] **C1 (M, A) – NA KONIEC** Wybór adresu docelowego (domena/subdomena/katalog) i certyfikat HTTPS; decyzja po poprawkach, dyskusjach i testach
 
 ## Blok D: dokumentacja
 
-- [ ] **D1 (M, C)** `RUNBOOK.md`: instrukcja dla Organizatora (przed przejazdem: wgranie GPX i `poi.json` wraz z odczytem kilometrów POI z mapy, test; ładowanie telefonu; ustawienia Traccar: High, Distance 25 m, lokalizacja „Zawsze" i „Precise"; w trakcie; po przejeździe; co robić, gdy znika sygnał)
-- [ ] **D2 (S, C)** `ARCHITECTURE.md` (telefon → ingest → `latest.json` → strona) i `REQUIREMENTS.md` zebrane z decyzji
-- [ ] **D3 (S, C)** `TESTING.md`: wyniki testów obciążeniowych i checklista testów akceptacyjnych
+- [x] **D1 (M, C)** `RUNBOOK.md`: instrukcja dla Organizatora (przed przejazdem: wgranie GPX i `poi.json` wraz z odczytem kilometrów POI z mapy, test; ładowanie telefonu; ustawienia Traccar: High, Distance 25 m, lokalizacja „Zawsze" i „Precise"; w trakcie; po przejeździe; co robić, gdy znika sygnał)
+- [x] **D2 (S, C)** `ARCHITECTURE.md` (telefon → ingest → `latest.json` → strona) i `REQUIREMENTS.md` zebrane z decyzji
+- [x] **D3 (S, C)** `TESTING.md`: wyniki testów obciążeniowych i checklista testów akceptacyjnych
 - [ ] **D4 (M, A)** Aktualizacja `PROJECT.md` (stan, następny krok, odnośnik do `BACKLOG.md`)
 
 ## Blok E: testy i go-live
