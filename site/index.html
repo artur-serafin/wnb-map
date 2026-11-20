@@ -1,0 +1,725 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Map</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<style>
+  html, body { height: 100%; margin: 0; }
+  body { display: flex; flex-direction: column; font: 16px/1.4 system-ui, sans-serif; }
+  header { display: flex; align-items: center; gap: .5rem; padding: .5rem .9rem; padding-top: calc(.5rem + env(safe-area-inset-top, 0px)); background: #14213d; color: #fff; }
+  header h1 { flex: 1; min-width: 0; font-size: 1rem; margin: 0; font-weight: 600; }
+  .burger { flex: none; width: 40px; height: 40px; margin: -.35rem -.5rem -.35rem 0; padding: 0; display: grid; place-items: center; border: 0; background: transparent; color: #fff; }
+  .burger svg, .fab svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .stage { flex: 1; min-height: 0; position: relative; }
+  #map { position: absolute; inset: 0; }
+  #notes { position: absolute; top: 10px; left: 0; right: 0; z-index: 1000; display: flex; flex-direction: column; align-items: center; gap: 6px; pointer-events: none; }
+  .pill { font-variant-numeric: tabular-nums; max-width: 90%; padding: .35rem .9rem; border-radius: 999px; background: rgba(20,33,61,.82); color: #fff; font-size: .9rem; text-align: center; }
+  .pill[hidden], #menuLayer[hidden] { display: none; }
+  .fabs { position: absolute; right: calc(12px + env(safe-area-inset-right, 0px)); bottom: calc(12px + env(safe-area-inset-bottom, 0px)); z-index: 1000; display: flex; flex-direction: column; gap: 8px; }
+  .fab { width: 44px; height: 44px; padding: 0; display: grid; place-items: center; border: 0; border-radius: 10px; background: rgba(255,255,255,.95); color: #14213d; box-shadow: 0 1px 6px rgba(0,0,0,.35); }
+  .gap { height: 8px; }
+  .fab[hidden] { display: none; }
+  #menuLayer { position: absolute; inset: 0; z-index: 1100; }
+  #backdrop { position: absolute; inset: 0; background: rgba(0,0,0,.25); }
+  .menu { position: absolute; top: 8px; right: calc(8px + env(safe-area-inset-right, 0px)); width: min(86vw, 340px); max-height: calc(100% - 16px); overflow: auto; box-sizing: border-box; padding: .8rem 1rem 1rem; border-radius: 14px; background: #fff; color: #14213d; box-shadow: 0 4px 18px rgba(0,0,0,.4); }
+  .menu h2 { margin: .3rem 0 .4rem; font-size: .75rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; opacity: .6; }
+  .menu h2:not(:first-child) { margin-top: 1rem; }
+  .menu p { margin: .4rem 0; font-size: .85rem; }
+  .seg { display: flex; gap: .4rem; }
+  .seg button { flex: 1; padding: .5rem; border: 1px solid #14213d; border-radius: 8px; background: #fff; color: #14213d; font: inherit; }
+  .seg button[aria-pressed="true"] { background: #14213d; color: #fff; }
+  .leaflet-tooltip.orgtip { background: #fff; color: #14213d; border: 0; border-radius: 10px; padding: 4px 8px; font-weight: 600; font-variant-numeric: tabular-nums; box-shadow: 0 1px 5px rgba(0,0,0,.35); }
+  .leaflet-tooltip-top.orgtip::before { border-top-color: #fff; }
+  .arrow, .sficon { background: none; border: 0; }
+  .beam { background: none; border: 0; transition: opacity .3s; }
+  .beam svg { transition: transform .3s linear; }
+  .leaflet-tooltip.sftip { background: #fff; color: #14213d; border: 0; border-radius: 8px; padding: 2px 7px; font-size: .75rem; font-weight: 700; box-shadow: 0 1px 4px rgba(0,0,0,.35); }
+  .leaflet-tooltip.sftip::before { display: none; }
+  .far .sftip { display: none; }
+  .poi { background: none; border: 0; }
+  .leaflet-marker-icon.poi.leaflet-interactive { pointer-events: none; }
+  .poi svg { pointer-events: none; }
+  .poi svg.badge { pointer-events: auto; cursor: pointer; }
+  .kmpop .leaflet-popup-content-wrapper { border-radius: 10px; color: #14213d; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .kmpop .leaflet-popup-content { margin: 6px 11px; line-height: 1.35; }
+  #glowLayer { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 900; }
+  #glow { position: absolute; left: 0; top: 0; border-radius: 50%; opacity: 0; transition: opacity .25s; will-change: transform; }
+  #glowDist { position: absolute; left: 0; top: 0; padding: .15rem .6rem; border-radius: 999px; background: rgba(20,33,61,.82); color: #fff; font-size: .8rem; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; opacity: 0; transition: opacity .25s; }
+  .leaflet-tooltip.etatip { background: #14213d; color: #fff; border: 0; border-radius: 10px; padding: 3px 8px; font-weight: 700; font-variant-numeric: tabular-nums; box-shadow: 0 1px 5px rgba(0,0,0,.35); }
+  .leaflet-tooltip.etatip::before { display: none; }
+  .kmpop .sub { font-weight: 500; font-size: .8rem; opacity: .7; }
+</style>
+</head>
+<body>
+<header>
+  <h1 id="title">…</h1>
+  <button class="burger" id="btnMenu" aria-haspopup="dialog" aria-expanded="false" aria-controls="menu"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+</header>
+<div class="stage">
+  <div id="map"></div>
+  <div id="glowLayer"><div id="glow"></div><div id="glowDist"></div></div>
+  <div id="notes"><div class="pill" id="statusBox" hidden></div><div class="pill" id="geoBox" hidden></div></div>
+  <div class="fabs">
+    <button class="fab" id="btnIn"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+    <button class="fab" id="btnOut"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+    <div class="gap"></div>
+    <button class="fab" id="btnFit"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
+    <button class="fab" id="btnOrg"><svg viewBox="0 0 24 24"><circle id="orgIcon" cx="12" cy="12" r="6.5" stroke-width="3"/></svg></button>
+    <button class="fab" id="btnMe"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="7"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button>
+  </div>
+  <div id="menuLayer" hidden>
+    <div id="backdrop"></div>
+    <div class="menu" id="menu" role="dialog">
+      <h2 id="hLang"></h2><div class="seg" id="langSeg"></div>
+      <h2 id="hPrivacy"></h2><div id="privacy"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="config.js"></script>
+<script>
+const C = CONFIG, COL = C.COLORS;
+const $ = id => document.getElementById(id);
+const setPill = (el, text) => { el.hidden = !text; if (text) el.textContent = text; };
+let T = {}, lang = null;
+const fill = s => (s || '').replace('{name}', C.ORGANIZER_NAME);
+
+// ---------- języki ----------
+function pickLang() {
+  let saved = null;
+  try { saved = localStorage.getItem('wnb_lang'); } catch (e) {}
+  if (saved && C.LANGS[saved]) return saved;
+  const nav = (navigator.language || '').slice(0, 2).toLowerCase();
+  return C.LANGS[nav] ? nav : C.DEFAULT_LANG;
+}
+async function setLang(code, save) {
+  try {
+    const res = await fetch(C.LANG_DIR + code + '.json', { cache: 'no-cache' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    T = await res.json(); lang = code;
+  } catch (e) {
+    if (code !== C.DEFAULT_LANG) return setLang(C.DEFAULT_LANG, false);
+    return;
+  }
+  if (save) { try { localStorage.setItem('wnb_lang', code); } catch (e) {} }
+  applyTexts();
+}
+function applyTexts() {
+  document.documentElement.lang = lang;
+  [['btnIn', T.BTN_ZOOM_IN], ['btnOut', T.BTN_ZOOM_OUT], ['btnFit', T.BTN_FIT],
+   ['btnOrg', fill(T.BTN_ORG)], ['btnMe', T.BTN_ME], ['btnMenu', T.BTN_MENU]]
+    .forEach(([id, t]) => { $(id).setAttribute('aria-label', t || ''); $(id).title = t || ''; });
+  $('menu').setAttribute('aria-label', T.BTN_MENU || '');
+  $('hLang').textContent = T.MENU_LANGUAGE || '';
+  $('hPrivacy').textContent = T.MENU_PRIVACY || '';
+  const seg = $('langSeg'); seg.textContent = '';
+  Object.entries(C.LANGS).forEach(([code, label]) => {
+    const b = document.createElement('button');
+    b.textContent = label; b.setAttribute('aria-pressed', String(code === lang));
+    b.onclick = () => setLang(code, true);
+    seg.appendChild(b);
+  });
+  const priv = $('privacy'); priv.textContent = '';
+  (T.PRIVACY || []).forEach(t => { const p = document.createElement('p'); p.textContent = fill(t); priv.appendChild(p); });
+  if (routeFailed) $('title').textContent = T.ROUTE_ERROR;
+  refreshSfLabels(); renderGeo(); renderLive(); renderEta();
+}
+
+// ---------- menu ----------
+function toggleMenu(open) {
+  $('menuLayer').hidden = !open;
+  $('btnMenu').setAttribute('aria-expanded', String(open));
+}
+$('btnMenu').onclick = () => toggleMenu($('menuLayer').hidden);
+$('backdrop').onclick = () => toggleMenu(false);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') toggleMenu(false); });
+
+$('orgIcon').style.fill = COL.organizer; $('orgIcon').style.stroke = COL.outline;
+
+// ---------- mapa ----------
+const map = L.map('map', { zoomControl: false }).setView([52.23, 21.01], 12);
+map.attributionControl.setPosition('bottomleft');
+map.createPane('routePane').style.zIndex = 390;   // trasa pod ogonem i znacznikami WnB
+map.createPane('arrowPane').style.zIndex = 395;   // strzałki kierunku nad trasą
+map.createPane('beamPane').style.zIndex = 399;    // wskaźnik kierunku ruchu Uczestnika pod jego kropką
+L.tileLayer(C.TILE_URL, { maxZoom: C.MAX_ZOOM, attribution: C.TILE_ATTRIBUTION }).addTo(map);
+let routeBounds = null, routeFailed = false, routePts = [], routeCum = [], startMarker = null, finishMarker = null;
+const focus = ll => map.setView(ll, Math.max(map.getZoom(), C.FOCUS_ZOOM));
+
+function km(a, b) {
+  const R = 6371, rad = Math.PI / 180, dLat = (b[0] - a[0]) * rad, dLon = (b[1] - a[1]) * rad;
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(a[0] * rad) * Math.cos(b[0] * rad) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+function formIdx(n) {
+  if (lang === 'pl') { const m10 = n % 10, m100 = n % 100; return n === 1 ? 0 : (m10 >= 2 && m10 <= 4 && (m100 < 10 || m100 >= 20)) ? 1 : 2; }
+  return n === 1 ? 0 : 2;
+}
+function fmtAgo(s) {
+  const sec = s < 90, n = Math.max(1, Math.round(sec ? s : s / 60)), units = (sec ? T.UNIT_SEC : T.UNIT_MIN) || ['', '', ''];
+  return (T.AGO || '{ago}').replace('{ago}', n + ' ' + units[formIdx(n)]);
+}
+
+// ---------- trasa ----------
+function noRoute() {   // przejazd bez trasy: pokazujemy tylko mapę i pozycję WnB
+  routeFailed = false;
+  const t = C.NO_ROUTE_TITLE || '';
+  $('title').textContent = t;
+  if (t) document.title = t;
+  $('btnFit').hidden = true;   // przycisk "Cała trasa" nie ma wtedy sensu
+}
+async function loadRoute() {
+  try {
+    const res = await fetch(C.GPX_URL, { cache: 'no-cache' });
+    if (res.status === 404) { noRoute(); return; }   // brak trasy to stan celowy: bez komunikatu, bez POI i ETA
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const xml = new DOMParser().parseFromString(await res.text(), 'application/xml');
+    const trk = xml.getElementsByTagName('trk')[0];
+    if (xml.getElementsByTagName('parsererror').length || !trk) throw new Error('GPX');
+    const nameEl = trk.getElementsByTagName('name')[0];
+    const name = (nameEl && nameEl.textContent.trim()) || C.GPX_URL.split('/').pop();
+    const pts = [];
+    for (const p of trk.getElementsByTagName('trkpt')) {
+      const ll = [parseFloat(p.getAttribute('lat')), parseFloat(p.getAttribute('lon'))], last = pts[pts.length - 1];
+      if (!last || last[0] !== ll[0] || last[1] !== ll[1]) pts.push(ll);
+    }
+    if (pts.length < 2) throw new Error('GPX');
+    routeCum = [0];   // kilometraż: długość trasy od startu w kolejnych punktach (km)
+    for (let i = 1; i < pts.length; i++) routeCum.push(routeCum[i - 1] + km(pts[i - 1], pts[i]));
+    const total = routeCum[routeCum.length - 1];
+    routePts = pts;
+    const line = L.polyline(pts, { color: COL.route, weight: C.ROUTE_WIDTH, opacity: .9, pane: 'routePane' }).addTo(map);
+    addStartFinish(pts);
+    routeBounds = line.getBounds();
+    map.fitBounds(routeBounds, { padding: [C.FIT_PADDING, C.FIT_PADDING] });
+    prepRoute(); drawArrows(); updateFar(); loadPoi(); updateProgress(); renderEta();
+    $('title').textContent = name + ' - ' + total.toFixed(1).replace('.', ',') + ' km';
+    document.title = name;
+  } catch (e) {
+    routeFailed = true; $('title').textContent = T.ROUTE_ERROR || '';
+  }
+}
+
+// ---------- strzałki kierunku, start i meta ----------
+const AR = { on: C.SHOW_ARROWS !== false, step: C.ARROW_SPACING_PX || 110, size: C.ARROW_SIZE_PX || 14, color: COL.arrow || '#8f1d2c' };
+const arrowLayer = L.layerGroup().addTo(map);
+
+// Punkty co 'step' pikseli wzdłuż linii (px = [{x,y}]), z kierunkiem w stopniach od północy.
+function arrowSpots(px, step) {
+  const out = []; let toNext = step / 2;
+  for (let i = 1; i < px.length; i++) {
+    const a = px[i - 1], b = px[i], dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy);
+    if (!len) continue;
+    const deg = Math.atan2(dx, -dy) * 180 / Math.PI;
+    let pos = toNext;
+    while (pos <= len) { out.push({ x: a.x + dx * pos / len, y: a.y + dy * pos / len, deg }); pos += step; }
+    toNext = pos - len;
+  }
+  return out;
+}
+function arrowIcon(deg) {
+  const s = AR.size;
+  return L.divIcon({
+    className: 'arrow', iconSize: [s, s], iconAnchor: [s / 2, s / 2],
+    html: '<svg viewBox="0 0 24 24" width="' + s + '" height="' + s + '" style="transform:rotate(' + deg.toFixed(1) + 'deg)">' +
+          '<path d="M12 3 20 20 12 15.5 4 20Z" fill="' + AR.color + '" stroke="#fff" stroke-width="2" stroke-linejoin="round"/></svg>'
+  });
+}
+function drawArrows() {   // rysujemy tylko strzałki w okolicy widocznego fragmentu mapy
+  arrowLayer.clearLayers();
+  if (!AR.on || routePts.length < 2) return;
+  const z = map.getZoom(), view = map.getBounds().pad(0.5);
+  const px = routePts.map(ll => map.project(ll, z));
+  arrowSpots(px, AR.step).forEach(s => {
+    const ll = map.unproject(L.point(s.x, s.y), z);
+    if (view.contains(ll)) arrowLayer.addLayer(L.marker(ll, { icon: arrowIcon(s.deg), interactive: false, keyboard: false, pane: 'arrowPane' }));
+  });
+}
+map.on('moveend', drawArrows);
+
+function sfIcon(kind) {
+  const svg = kind === 'start'
+    ? '<svg viewBox="0 0 24 24" width="26" height="26"><circle cx="12" cy="12" r="10" fill="' + COL.start + '" stroke="#fff" stroke-width="2"/><path d="M10 7.5v9l7-4.5z" fill="#fff"/></svg>'
+    : '<svg viewBox="0 0 24 24" width="26" height="26"><rect x="2.5" y="2.5" width="19" height="19" rx="4" fill="#fff" stroke="' + COL.outline + '" stroke-width="2"/><path d="M4 4h8v8H4zM12 12h8v8h-8z" fill="' + COL.outline + '"/></svg>';
+  return L.divIcon({ className: 'sficon', iconSize: [26, 26], iconAnchor: [13, 13], html: svg });
+}
+function addStartFinish(pts) {
+  const west = pts[0][1] <= pts[pts.length - 1][1];   // etykiety po przeciwnych stronach, bo start i meta są blisko siebie
+  const mk = (ll, kind, left) => L.marker(ll, { icon: sfIcon(kind), zIndexOffset: 1000, interactive: false, keyboard: false })
+    .addTo(map).bindTooltip('', { permanent: true, direction: left ? 'left' : 'right', offset: [left ? -10 : 10, 0], className: 'sftip' });
+  startMarker = mk(pts[0], 'start', west);
+  finishMarker = mk(pts[pts.length - 1], 'finish', !west);
+  refreshSfLabels();
+}
+function refreshSfLabels() {
+  if (startMarker) startMarker.setTooltipContent(T.START || 'Start');
+  if (finishMarker) finishMarker.setTooltipContent(T.FINISH || (lang === 'pl' ? 'Meta' : 'Finish'));
+}
+const LABELS_MIN_ZOOM = C.LABELS_MIN_ZOOM || 16;   // etykiety "Start"/"Meta" od tego przybliżenia
+function updateFar() { map.getContainer().classList.toggle('far', map.getZoom() < LABELS_MIN_ZOOM); }
+map.on('zoomend', updateFar);
+
+// ---------- kilometraż trasy (dotknięcie trasy) ----------
+function fmtKm(v) {
+  const m = Math.round(v * 1000), k = Math.floor(m / 1000), r = m % 1000;
+  return k > 0 ? k + ' km ' + r + ' m' : r + ' m';
+}
+// Kilometry trasy w pobliżu punktu (zwykle jeden; w miejscach, gdzie trasa przecina samą siebie, kilka).
+function routeKmAt(latlng) {
+  const z = map.getZoom(), p = map.project(latlng, z), hit = C.ROUTE_TAP_PX || 22;
+  // Przy małym przybliżeniu promień dotknięcia obejmuje setki metrów, więc kolejne odcinki tego samego fragmentu
+  // trasy (zakręty, zygzaki) nie mogą być liczone jako różne miejsca: łączymy je, jeśli leżą bliżej niż ok. 4 promienie.
+  const mpp = 156543.03 * Math.cos(latlng.lat * Math.PI / 180) / Math.pow(2, z);
+  const same = Math.max(0.15, 4 * hit * mpp / 1000);
+  const px = routePts.map(ll => map.project(ll, z)), found = [];
+  for (let i = 1; i < px.length; i++) {
+    const a = px[i - 1], b = px[i], dx = b.x - a.x, dy = b.y - a.y, l2 = dx * dx + dy * dy;
+    const t = l2 ? Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / l2)) : 0;
+    const qx = a.x + t * dx, qy = a.y + t * dy, d = Math.hypot(p.x - qx, p.y - qy);
+    if (d <= hit) found.push({ d, km: routeCum[i - 1] + t * (routeCum[i] - routeCum[i - 1]), ll: map.unproject(L.point(qx, qy), z) });
+  }
+  found.sort((x, y) => x.d - y.d);
+  const out = [];
+  for (const f of found) {
+    if (!out.length || (f.d <= out[0].d + 10 && out.every(o => Math.abs(o.km - f.km) > same))) out.push(f);
+    if (out.length >= 4) break;
+  }
+  return out.sort((x, y) => x.km - y.km);
+}
+const kmPopup = L.popup({ closeButton: false, autoPan: false, offset: [0, -2], className: 'kmpop' });
+map.on('click', e => {
+  if (routePts.length < 2) return;
+  const r = routeKmAt(e.latlng);
+  if (!r.length) return;
+  const box = document.createElement('div');
+  r.forEach(x => { const d = document.createElement('div'); d.textContent = fmtKm(x.km); box.appendChild(d); });
+  kmPopup.setLatLng(r[0].ll).setContent(box).openOn(map);
+});
+
+// ---------- punkty POI ----------
+const POI_SIZE = C.POI_ICON_SIZE_PX || 34;
+const POI_TYPES = {
+  zabka: '<circle cx="17" cy="17" r="16" fill="#1e9b4d" stroke="#fff" stroke-width="2"/>' +
+         '<ellipse cx="17" cy="20" rx="9.5" ry="6.8" fill="#fff"/>' +
+         '<circle cx="12.3" cy="12.6" r="4.3" fill="#fff"/><circle cx="21.7" cy="12.6" r="4.3" fill="#fff"/>' +
+         '<circle cx="12.3" cy="12.9" r="1.9" fill="#14213d"/><circle cx="21.7" cy="12.9" r="1.9" fill="#14213d"/>' +
+         '<path d="M11.8 20.8Q17 25.6 22.2 20.8" fill="none" stroke="#1e9b4d" stroke-width="1.7" stroke-linecap="round"/>',
+  lody:  '<circle cx="17" cy="17" r="16" fill="#ff7aa8" stroke="#fff" stroke-width="2"/>' +
+         '<path d="M11 16h12l-6 12z" fill="#d98c3f"/>' +
+         '<circle cx="17" cy="12.5" r="6.8" fill="#fff6e0"/><path d="M13.3 11.2a4 4 0 0 1 3-2.4" fill="none" stroke="#ff7aa8" stroke-width="1.5" stroke-linecap="round"/>'
+};
+function parsePos(e) {   // "52.2184, 21.0151" (wklejone z Google Maps) albo pola lat/lon
+  if (typeof e.pos === 'string') {
+    const m = e.pos.match(/^\s*(-?\d+(?:\.\d+)?)\s*[,;\s]\s*(-?\d+(?:\.\d+)?)\s*$/);
+    return m ? [parseFloat(m[1]), parseFloat(m[2])] : null;
+  }
+  const lat = parseFloat(e.lat), lon = parseFloat(e.lon);
+  return isFinite(lat) && isFinite(lon) ? [lat, lon] : null;
+}
+function parseKm(v) {    // liczba 12.524 albo tekst "12,524"
+  if (v == null || v === '') return null;
+  const n = typeof v === 'number' ? v : parseFloat(String(v).replace(',', '.'));
+  return isFinite(n) ? n : null;
+}
+// Znacznik POI: kółko z ikoną leży obok trasy, a ogon wskazuje dokładną pozycję punktu.
+// Kierunek ogona jest wybierany tak, żeby kółko leżało jak najdalej od trasy (liczone przy każdym przybliżeniu).
+const POI_R = POI_SIZE / 2, POI_TAIL = C.POI_TAIL_PX || 22, POI_D = POI_R + POI_TAIL;
+const POI_S = Math.ceil(2 * (POI_D + POI_R)) + 4;
+const POI_COLOR = { zabka: '#1e9b4d', lody: '#ff7aa8' };
+
+function distToRoute(c, px) {
+  let best = Infinity;
+  for (let i = 1; i < px.length; i++) {
+    const a = px[i - 1], b = px[i], dx = b.x - a.x, dy = b.y - a.y, l2 = dx * dx + dy * dy;
+    const t = l2 ? Math.max(0, Math.min(1, ((c.x - a.x) * dx + (c.y - a.y) * dy) / l2)) : 0;
+    best = Math.min(best, Math.hypot(c.x - (a.x + t * dx), c.y - (a.y + t * dy)));
+  }
+  return best;
+}
+function poiAngle(tip, px) {   // kąt (stopnie od góry, zgodnie z ruchem wskazówek), w którym kółko jest najdalej od trasy
+  let best = null;
+  for (let k = 0; k < 16; k++) {
+    const deg = k * 22.5, th = deg * Math.PI / 180;
+    const c = { x: tip.x + POI_D * Math.sin(th), y: tip.y - POI_D * Math.cos(th) };
+    const clear = Math.min(distToRoute(c, px) - POI_R, 16);   // ponad 16 px luzu nie ma znaczenia
+    const away = Math.min(deg, 360 - deg);                     // przy remisie wolimy kółko nad punktem
+    if (!best || clear > best.clear + 0.5 || (Math.abs(clear - best.clear) <= 0.5 && away < best.away)) best = { deg, clear, away };
+  }
+  return best.deg;
+}
+function poiIcon(type, deg) {
+  const th = deg * Math.PI / 180, ux = Math.sin(th), uy = -Math.cos(th), h = POI_S / 2, col = POI_COLOR[type];
+  const bx = h + POI_D * ux, by = h + POI_D * uy, vx = -uy, vy = ux, f = 38 * Math.PI / 180;
+  const base = s => (bx + POI_R * (-ux * Math.cos(f) + s * vx * Math.sin(f))).toFixed(1) + ',' + (by + POI_R * (-uy * Math.cos(f) + s * vy * Math.sin(f))).toFixed(1);
+  return L.divIcon({
+    className: 'poi', iconSize: [POI_S, POI_S], iconAnchor: [h, h],
+    popupAnchor: [POI_D * ux, POI_D * uy - POI_R],
+    html: '<svg viewBox="0 0 ' + POI_S + ' ' + POI_S + '" width="' + POI_S + '" height="' + POI_S + '">' +
+          '<polygon points="' + h + ',' + h + ' ' + base(1) + ' ' + base(-1) + '" fill="' + col + '" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>' +
+          '<svg class="badge" x="' + (bx - POI_R).toFixed(1) + '" y="' + (by - POI_R).toFixed(1) + '" width="' + POI_SIZE + '" height="' + POI_SIZE + '" viewBox="0 0 34 34">' + POI_TYPES[type] + '</svg></svg>'
+  });
+}
+const poiList = [];
+function addPoi(e) {
+  const svg = POI_TYPES[e && e.type], ll = e && parsePos(e);
+  if (!svg || !ll) { console.warn('poi.json: pominięto wpis', e); return; }
+  const kmv = parseKm(e.km), box = document.createElement('div');
+  const name = document.createElement('div'); name.textContent = e.name || ''; box.appendChild(name);
+  if (kmv != null) { const k = document.createElement('div'); k.className = 'sub'; k.textContent = fmtKm(kmv); box.appendChild(k); }
+  const marker = L.marker(ll, { icon: poiIcon(e.type, 0), zIndexOffset: 500, keyboard: false })
+    .addTo(map).bindPopup(box, { closeButton: false, autoPan: false, className: 'kmpop' });
+  poiList.push({ type: e.type, name: e.name, ll, km: kmv, marker });
+}
+function placePois() {
+  if (!poiList.length || routePts.length < 2) return;
+  const z = map.getZoom(), px = routePts.map(ll => map.project(ll, z));
+  poiList.forEach(p => { p.deg = poiAngle(map.project(p.ll, z), px); p.marker.setIcon(poiIcon(p.type, p.deg)); });
+  renderEta();
+}
+map.on('zoomend', placePois);
+async function loadPoi() {   // plik POI jest opcjonalny
+  try {
+    const res = await fetch(C.POI_URL || 'data/poi.json', { cache: 'no-cache' });
+    if (!res.ok) return;
+    const list = await res.json();
+    if (Array.isArray(list)) { list.forEach(addPoi); placePois(); }
+  } catch (e) { console.warn('poi.json', e); }
+}
+
+// ---------- pozycja WnB ----------
+let org = null, polled = false, failCount = 0, serverOffset = 0, orgMarker = null;
+const tailCase = L.polyline([], { color: COL.outline, weight: C.TAIL_WIDTH + 4, opacity: .55 });
+const tail = L.polyline([], { color: COL.organizer, weight: C.TAIL_WIDTH });
+
+async function pollLive() {
+  try {
+    const res = await fetch(C.LIVE_URL + '?t=' + Date.now(), { cache: 'no-store' });
+    if (res.status === 404) { org = null; failCount = 0; }
+    else if (!res.ok) throw new Error('HTTP ' + res.status);
+    else {
+      const d = await res.json(), hdr = res.headers.get('Date');   // czas serwera, nie telefonu
+      if (hdr) serverOffset = new Date(hdr).getTime() - Date.now();
+      org = d && d.last ? d : null; failCount = 0;
+    }
+  } catch (e) { failCount++; }   // pojedynczy błąd nie zmienia widoku: zostają poprzednie dane
+  polled = true;
+  updateProgress();
+  renderLive(); renderEta(); updateGlow();
+}
+
+function removeOrg() {
+  if (orgMarker) { map.removeLayer(orgMarker); orgMarker = null; }
+  map.removeLayer(tailCase); map.removeLayer(tail);
+}
+
+function bubbleText(age, speed) {
+  const ago = age > C.FRESH_SECONDS ? fmtAgo(age) : '';
+  const moving = speed != null && speed >= C.STILL_SPEED_KMH;
+  let head;
+  if (age > C.LOST_AFTER_SECONDS) head = '';
+  else if (moving) head = age <= C.STOP_AFTER_SECONDS ? (T.SPEED || '').replace('{n}', Math.round(speed)) : T.PROBABLY_STILL;
+  else head = T.STILL;
+  return [head, ago].filter(Boolean).join(', ');
+}
+
+function renderLive() {
+  if (!polled || !lang) return;
+  const failed = failCount >= C.FAIL_AFTER_POLLS, bad = failed ? T.NO_CONNECTION : null, box = $('statusBox');
+  if (!org) { removeOrg(); setPill(box, bad || (failCount > 0 ? null : fill(T.NO_DATA))); return; }
+  const age = (Date.now() + serverOffset) / 1000 - org.last.ts;
+  if (age > C.END_AFTER_SECONDS) { removeOrg(); setPill(box, bad || T.ENDED); return; }
+
+  const ll = [org.last.lat, org.last.lon], pts = (org.tail || []).map(p => [p[0], p[1]]);
+  const text = bubbleText(age, org.last.speed_kmh), lost = age > C.LOST_AFTER_SECONDS;
+  if (!orgMarker) {
+    tailCase.addTo(map); tail.addTo(map);
+    orgMarker = L.circleMarker(ll, { radius: C.MARKER_RADIUS, color: COL.outline, weight: 3, fillOpacity: 1 }).addTo(map);
+    orgMarker.bindTooltip(text, { permanent: true, direction: 'top', offset: [0, -C.MARKER_RADIUS + 2], className: 'orgtip' });
+  }
+  orgMarker.setLatLng(ll); tailCase.setLatLngs(pts); tail.setLatLngs(pts);
+  orgMarker.setStyle({ fillColor: lost ? COL.organizerLost : COL.organizer });
+  orgMarker.setTooltipContent(text);
+  setPill(box, bad || (lost ? fill(T.LOST) : null));
+}
+
+// ---------- postęp WnB na trasie (km) i ETA ----------
+let routeXY = [], lat0 = 52.23, lon0 = 21.0, cos0 = 0.61, prog = null, progTs = null, prevProg = null;
+const toXY = ll => [(ll[1] - lon0) * 111320 * cos0, (ll[0] - lat0) * 110570];
+function prepRoute() {
+  lat0 = routePts[0][0]; lon0 = routePts[0][1]; cos0 = Math.cos(lat0 * Math.PI / 180);
+  routeXY = routePts.map(toXY);
+}
+const bearing = (a, b) => Math.atan2((b[1] - a[1]) * cos0, b[0] - a[0]) * 180 / Math.PI;
+const angDiff = (a, b) => Math.abs(((a - b + 540) % 360) - 180);
+
+// Miejsca trasy w pobliżu punktu: po jednym na każdy odrębny fragment trasy (km różniące się o > 150 m).
+function routeCands(ll) {
+  const [x, y] = toXY(ll), max = C.ROUTE_MAX_OFFSET_METERS || 200, found = [];
+  for (let i = 1; i < routeXY.length; i++) {
+    const a = routeXY[i - 1], b = routeXY[i], dx = b[0] - a[0], dy = b[1] - a[1], l2 = dx * dx + dy * dy;
+    const t = l2 ? Math.max(0, Math.min(1, ((x - a[0]) * dx + (y - a[1]) * dy) / l2)) : 0;
+    const d = Math.hypot(x - (a[0] + t * dx), y - (a[1] + t * dy));
+    if (d <= max) found.push({ d, km: routeCum[i - 1] + t * (routeCum[i] - routeCum[i - 1]), brg: Math.atan2(dx, dy) * 180 / Math.PI });
+  }
+  found.sort((p, q) => p.d - q.d);
+  const out = [];
+  for (const f of found) { if (out.every(o => Math.abs(o.km - f.km) > 0.15)) out.push(f); if (out.length >= 6) break; }
+  return out;
+}
+
+// Kilometr trasy, na którym jest WnB. Wybór spośród kilku możliwych miejsc (skrzyżowania, start = meta)
+// rozstrzyga ciągłość ruchu w ogonie (kolejne punkty muszą się układać w jazdę do przodu wzdłuż trasy) i kierunek jazdy.
+function computeProgress(o) {
+  if (routeXY.length < 2 || !o || !o.tail || !o.tail.length) return null;
+  const all = o.tail.map(p => ({ ll: [p[0], p[1]], ts: p[2] }));
+  all.forEach(p => { p.c = routeCands(p.ll); });
+  if (!all[all.length - 1].c.length) return null;            // WnB jest poza trasą
+  const seq = all.filter(p => p.c.length);
+  let prev = null;
+  seq.forEach((p, k) => {
+    p.cost = p.c.map(c => c.d / 50 + (k === 0 ? (prevProg != null ? Math.abs(c.km - prevProg) / 0.5 : c.km * 0.02) : 0));
+    p.from = p.c.map(() => -1);
+    if (prev) {
+      const g = km(prev.ll, p.ll), brg = bearing(prev.ll, p.ll);
+      p.c.forEach((c, j) => {
+        let best = Infinity, bi = -1;
+        prev.c.forEach((a, i) => {
+          let t = prev.cost[i] + Math.abs((c.km - a.km) - g) / 0.05;
+          if (g > 0.015) t += angDiff(brg, c.brg) / 45;
+          if (t < best) { best = t; bi = i; }
+        });
+        p.cost[j] += best; p.from[j] = bi;
+      });
+    }
+    prev = p;
+  });
+  let j = 0; const lastp = seq[seq.length - 1];
+  lastp.cost.forEach((c, i) => { if (c < lastp.cost[j]) j = i; });
+  const kms = new Array(seq.length);
+  for (let k = seq.length - 1; k >= 0; k--) { kms[k] = seq[k].c[j].km; j = seq[k].from[j]; }
+  // średnia prędkość WnB z ogona (długość przebytej drogi / czas)
+  let path = 0;
+  for (let i = 1; i < all.length; i++) path += km(all[i - 1].ll, all[i].ll);
+  const span = all[all.length - 1].ts - all[0].ts;
+  return { km: kms[kms.length - 1], q: kms[0], v: span >= 30 ? path / (span / 3600) : null };
+}
+function updateProgress() {
+  if (!org) { prog = null; progTs = null; return; }
+  if (!routeXY.length || org.last.ts === progTs) return;
+  prog = computeProgress(org); progTs = org.last.ts;
+  if (prog) prevProg = prog.km;
+}
+
+// Co pokazać przy punktach: ETA do najbliższego punktu przed WnB (albo mety), "WnB jest tutaj", "WnB stoi".
+function getTargets() {
+  const t = poiList.filter(p => p.km != null).map((p, i) => ({ id: 'p' + i, ll: p.ll, km: p.km, poi: p }));
+  if (routePts.length > 1) t.push({ id: 'finish', ll: routePts[routePts.length - 1], km: routeCum[routeCum.length - 1], finish: true });
+  return t.sort((a, b) => a.km - b.km);
+}
+function etaInfo(pr, last, age, targets) {
+  if (!pr || age > C.LOST_AFTER_SECONDS) return null;
+  const at = (C.POI_AT_METERS || 100) / 1000;
+  const v = pr.v != null ? pr.v : last.speed_kmh;   // do ETA: średnia prędkość z ogona
+  // Czy WnB jedzie, decyduje ostatnio zgłoszona prędkość (brak prędkości = heartbeat = postój)
+  const moving = age <= C.STOP_AFTER_SECONDS && last.speed_kmh != null && last.speed_kmh >= C.STILL_SPEED_KMH && v != null && v > 0;
+  if (!moving) {   // WnB w punkcie: blisko punktu i stoi (albo przyszedł heartbeat bez prędkości)
+    let near = null;
+    targets.forEach(t => { const d = km([last.lat, last.lon], t.ll); if (d <= at && (!near || d < near.d)) near = { t, d }; });
+    if (near) return { kind: 'at', target: near.t };
+  }
+  const prevT = targets.filter(t => t.km <= pr.km).pop();
+  if (prevT && pr.q <= prevT.km) return null;   // ETA dopiero, gdy ogon wyjedzie poza kilometr ostatniego punktu
+  const next = targets.find(t => t.km > pr.km);
+  if (!next) return null;
+  if (!moving) return { kind: 'stopped', target: next };
+  return { kind: 'eta', target: next, minutes: ((next.km - pr.km) / v) * 60 - age / 60 };
+}
+function fmtEta(m) {
+  const step = C.ETA_ROUND_MINUTES || 5;
+  m = Math.max(1, m <= 10 ? Math.round(m) : Math.round(m / step) * step);
+  return m < 60 ? m + ' min' : Math.floor(m / 60) + ' h ' + String(m % 60).padStart(2, '0') + ' min';
+}
+function etaPlacement(t) {   // etykieta po zewnętrznej stronie kółka POI (albo nad metą)
+  if (t.finish || t.poi.deg == null) return { dir: 'top', offset: [0, -16] };
+  const th = t.poi.deg * Math.PI / 180, ux = Math.sin(th), uy = -Math.cos(th);
+  if (Math.abs(uy) >= Math.abs(ux)) return uy < 0 ? { dir: 'top', offset: [POI_D * ux, POI_D * uy - POI_R] } : { dir: 'bottom', offset: [POI_D * ux, POI_D * uy + POI_R] };
+  return ux > 0 ? { dir: 'right', offset: [POI_D * ux + POI_R, POI_D * uy] } : { dir: 'left', offset: [POI_D * ux - POI_R, POI_D * uy] };
+}
+let etaTip = null, etaKey = '';
+function setEtaLabel(t, text) {
+  if (!t || !text) { if (etaTip) { map.removeLayer(etaTip); etaTip = null; etaKey = ''; } return; }
+  const pl = etaPlacement(t), key = t.id + '|' + pl.dir + '|' + pl.offset.map(Math.round).join(',');
+  if (!etaTip || key !== etaKey) {
+    if (etaTip) map.removeLayer(etaTip);
+    etaTip = L.tooltip({ direction: pl.dir, offset: pl.offset, className: 'etatip', opacity: 1 }).setLatLng(t.ll).setContent(text).addTo(map);
+    etaKey = key;
+  } else etaTip.setContent(text);
+}
+function renderEta() {
+  if (C.SHOW_ETA === false || !org || !prog || !lang) { setEtaLabel(null); return; }
+  const age = (Date.now() + serverOffset) / 1000 - org.last.ts;
+  const info = etaInfo(prog, org.last, age, getTargets());
+  if (!info) { setEtaLabel(null); return; }
+  const text = info.kind === 'at' ? fill(T.AT_POI || '{name} is here')
+    : info.kind === 'stopped' ? fill(T.ETA_STOPPED || '{name} has stopped')
+    : (T.ETA || 'ETA ~{t}').replace('{t}', fmtEta(info.minutes));
+  setEtaLabel(info.target, text);
+}
+
+// ---------- wskaźnik kierunku do WnB poza ekranem (poświata przy brzegu mapy) ----------
+// Geometria: punkt na brzegu ekranu w stronę WnB (promień od środka ekranu); null, gdy WnB jest widoczny.
+function glowGeometry(size, p, m) {
+  if (p.x >= m && p.x <= size.x - m && p.y >= m && p.y <= size.y - m) return null;
+  const cx = size.x / 2, cy = size.y / 2, dx = p.x - cx, dy = p.y - cy;
+  const tx = dx ? (dx > 0 ? (size.x - cx) / dx : -cx / dx) : Infinity;
+  const ty = dy ? (dy > 0 ? (size.y - cy) / dy : -cy / dy) : Infinity;
+  const t = Math.min(tx, ty), len = Math.hypot(dx, dy);
+  return { x: cx + dx * t, y: cy + dy * t, ux: dx / len, uy: dy / len };
+}
+const hexRgba = (hex, a) => { const n = parseInt(hex.slice(1), 16); return 'rgba(' + (n >> 16 & 255) + ',' + (n >> 8 & 255) + ',' + (n & 255) + ',' + a + ')'; };
+function fmtDist(m) {
+  if (m < 995) return Math.max(10, Math.round(m / 10) * 10) + ' m';
+  const s = (m / 1000).toFixed(1);
+  return (lang === 'pl' ? s.replace('.', ',') : s) + ' km';
+}
+function updateGlow() {
+  const g = $('glow'), lab = $('glowDist');
+  const hide = () => { g.style.opacity = 0; lab.style.opacity = 0; };
+  if (C.SHOW_GLOW === false || !orgMarker) { hide(); return; }
+  const size = map.getSize(), ll = orgMarker.getLatLng();
+  const geo = glowGeometry(size, map.latLngToContainerPoint(ll), C.GLOW_VISIBLE_MARGIN_PX != null ? C.GLOW_VISIBLE_MARGIN_PX : 28);
+  if (!geo) { hide(); return; }
+  const s = C.GLOW_SIZE_PX || 220, col = orgMarker.options.fillColor || COL.organizer;
+  g.style.width = g.style.height = s + 'px';
+  g.style.background = 'radial-gradient(closest-side,' + hexRgba(col, C.GLOW_OPACITY != null ? C.GLOW_OPACITY : 0.8) + ' 0%,' + hexRgba(col, 0) + ' 100%)';
+  g.style.transform = 'translate(' + (geo.x - s / 2) + 'px,' + (geo.y - s / 2) + 'px)';
+  g.style.opacity = 1;
+  if (C.GLOW_SHOW_DISTANCE) {   // odległość od Uczestnika (a gdy nie znamy jego pozycji, od środka widoku)
+    lab.textContent = fmtDist(map.distance(meMarker ? meMarker.getLatLng() : map.getCenter(), ll));
+    const lx = Math.max(34, Math.min(size.x - 34, geo.x - geo.ux * 30)), ly = Math.max(16, Math.min(size.y - 16, geo.y - geo.uy * 30));
+    lab.style.transform = 'translate(' + (lx - lab.offsetWidth / 2) + 'px,' + (ly - lab.offsetHeight / 2) + 'px)';
+    lab.style.opacity = 1;
+  } else lab.style.opacity = 0;
+}
+map.on('move moveend zoomend resize', updateGlow);
+
+// ---------- pozycja Uczestnika (włącza się automatycznie) ----------
+let meMarker = null, meCircle = null, watchId = null, geoKey = null;
+function setGeo(key) { geoKey = key; renderGeo(); }
+function renderGeo() { setPill($('geoBox'), geoKey ? T[geoKey] : null); }
+function startLocating() {
+  if (!('geolocation' in navigator)) { setGeo('GEO_UNSUPPORTED'); return; }
+  if (watchId !== null) return;
+  setGeo('SEARCHING');
+  watchId = navigator.geolocation.watchPosition(onFix, onGeoError, {
+    enableHighAccuracy: C.GEO_HIGH_ACCURACY,
+    maximumAge: C.GEO_MAX_AGE_SECONDS * 1000,
+    timeout: C.GEO_TIMEOUT_SECONDS * 1000
+  });
+}
+// Kierunek ruchu Uczestnika: wiązka światła przy niebieskiej kropce (kierunek z GPS, tylko w ruchu).
+function beamIcon() {
+  const R = 44, S = 2 * R + 4, c = S / 2, a = 34 * Math.PI / 180, col = COL.me;
+  const x1 = (c - R * Math.sin(a)).toFixed(1), x2 = (c + R * Math.sin(a)).toFixed(1), y1 = (c - R * Math.cos(a)).toFixed(1);
+  return L.divIcon({
+    className: 'beam', iconSize: [S, S], iconAnchor: [c, c],
+    html: '<svg viewBox="0 0 ' + S + ' ' + S + '" width="' + S + '" height="' + S + '"><defs><radialGradient id="hbeam" gradientUnits="userSpaceOnUse" cx="' + c + '" cy="' + c + '" r="' + R + '">' +
+          '<stop offset="0" stop-color="' + col + '" stop-opacity=".75"/><stop offset="1" stop-color="' + col + '" stop-opacity="0"/></radialGradient></defs>' +
+          '<path d="M' + c + ' ' + c + 'L' + x1 + ' ' + y1 + 'A' + R + ' ' + R + ' 0 0 1 ' + x2 + ' ' + y1 + 'Z" fill="url(#hbeam)"/></svg>'
+  });
+}
+// Obrót wygładzony po najkrótszej drodze (kąt "rozwinięty", żeby przejście 359° -> 1° nie kręciło się dookoła).
+const smoothAngle = (prev, h, f) => prev == null ? h : prev + f * ((((h - prev) % 360) + 540) % 360 - 180);
+let beamMarker = null, beamAngle = null, beamTimer = null, beamMode = null, lastMoveAt = 0;
+let compassHeading = null, compassAt = 0, compassOn = false;
+const holdMs = () => (C.HEADING_HOLD_SECONDS || 3) * 1000;
+const isMoving = () => Date.now() - lastMoveAt < holdMs();
+const compassFresh = () => compassHeading != null && Date.now() - compassAt < 2000;
+function showBeam(angle, mode) {
+  beamAngle = smoothAngle(beamAngle, angle, C.HEADING_SMOOTHING != null ? C.HEADING_SMOOTHING : 0.5);
+  beamMarker.getElement().firstChild.style.transform = 'rotate(' + beamAngle.toFixed(1) + 'deg)';
+  beamMarker.setOpacity(1); beamMode = mode;
+}
+function updateBeam(pos, ll) {
+  if (C.SHOW_HEADING === false) return;
+  if (!beamMarker) beamMarker = L.marker(ll, { icon: beamIcon(), pane: 'beamPane', interactive: false, keyboard: false, opacity: 0 }).addTo(map);
+  beamMarker.setLatLng(ll);
+  const hd = pos.coords.heading, sp = pos.coords.speed, minSp = C.HEADING_MIN_SPEED_MS != null ? C.HEADING_MIN_SPEED_MS : 1.5;
+  if (hd == null || !isFinite(hd) || (sp != null && sp < minSp)) return;   // stoi albo brak kierunku z GPS: po chwili przejmuje kompas
+  lastMoveAt = Date.now();
+  showBeam(hd, 'move');
+  clearTimeout(beamTimer);
+  beamTimer = setTimeout(() => {
+    if (compassFresh()) showBeam(compassHeading, 'compass');   // stoi: kierunek patrzenia z kompasu
+    else { beamMarker.setOpacity(0); beamAngle = null; beamMode = null; }
+  }, holdMs());
+}
+
+// ---------- kompas telefonu: kierunek patrzenia, gdy Uczestnik stoi ----------
+// Kierunek, w którym skierowany jest telefon, z czujników orientacji (po zgodzie na iPhonie).
+function headingFromOrientation(alpha, beta, gamma) {
+  if (alpha == null) return null;
+  const r = Math.PI / 180, x = (beta || 0) * r, y = (gamma || 0) * r, z = alpha * r;
+  const cY = Math.cos(y), cZ = Math.cos(z), sX = Math.sin(x), sY = Math.sin(y), sZ = Math.sin(z);
+  const vx = -cZ * sY - sZ * sX * cY, vy = -sZ * sY + cZ * sX * cY;
+  if (Math.hypot(vx, vy) < 0.3) return (360 - alpha) % 360;   // telefon leży płasko: kierunek górnej krawędzi
+  let hd = Math.atan(vx / vy);
+  if (vy < 0) hd += Math.PI; else if (vx < 0) hd += 2 * Math.PI;
+  return hd * 180 / Math.PI;
+}
+function onCompass(ev) {
+  const now = Date.now();
+  if (now - compassAt < 100) return;   // nie częściej niż 10 razy na sekundę
+  const hd = typeof ev.webkitCompassHeading === 'number' ? ev.webkitCompassHeading : headingFromOrientation(ev.alpha, ev.beta, ev.gamma);
+  if (hd == null || !isFinite(hd) || hd < 0) return;
+  compassAt = now;
+  compassHeading = (hd + (C.COMPASS_DECLINATION_DEG != null ? C.COMPASS_DECLINATION_DEG : 7) + 360) % 360;   // z północy magnetycznej na geograficzną
+  if (beamMarker && C.SHOW_HEADING !== false && !isMoving()) showBeam(compassHeading, 'compass');
+}
+function startCompass() {
+  if (compassOn || C.SHOW_COMPASS === false || typeof DeviceOrientationEvent === 'undefined') return;
+  const attach = () => {
+    compassOn = true;
+    window.addEventListener('ondeviceorientationabsolute' in window ? 'deviceorientationabsolute' : 'deviceorientation', onCompass, true);
+  };
+  if (typeof DeviceOrientationEvent.requestPermission === 'function') {   // iPhone: zgoda wymaga dotknięcia przez użytkownika
+    DeviceOrientationEvent.requestPermission().then(s => { if (s === 'granted') attach(); }).catch(() => {});
+  } else attach();                                                         // Android i komputery: bez pytania
+}
+function onFix(pos) {
+  const ll = [pos.coords.latitude, pos.coords.longitude], acc = pos.coords.accuracy;
+  if (!meMarker) {
+    meCircle = L.circle(ll, { radius: acc, color: COL.me, weight: 1, fillOpacity: .12 }).addTo(map);
+    meMarker = L.circleMarker(ll, { radius: 8, color: '#fff', weight: 3, fillColor: COL.me, fillOpacity: 1 }).addTo(map);
+  } else { meMarker.setLatLng(ll); meCircle.setLatLng(ll); meCircle.setRadius(acc); }
+  updateBeam(pos, ll);
+  setGeo(null);
+}
+function onGeoError(err) {
+  setGeo(err.code === 1 ? 'GEO_DENIED' : 'GEO_UNAVAILABLE');
+  if (err.code === 1) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+}
+
+// ---------- przyciski i start ----------
+$('btnIn').onclick = () => map.zoomIn();
+$('btnOut').onclick = () => map.zoomOut();
+$('btnFit').onclick = () => { if (routeBounds) map.fitBounds(routeBounds, { padding: [C.FIT_PADDING, C.FIT_PADDING] }); };
+$('btnOrg').onclick = () => { if (orgMarker) focus(orgMarker.getLatLng()); };
+$('btnMe').onclick = () => { startCompass(); if (meMarker) focus(meMarker.getLatLng()); else startLocating(); };
+
+(async function start() {
+  await setLang(pickLang(), false);   // najpierw teksty, potem reszta
+  loadRoute(); pollLive(); startLocating();
+  if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission !== 'function') startCompass();   // poza iPhonem bez pytania
+  setInterval(pollLive, C.POLL_SECONDS * 1000);
+  setInterval(() => {
+    renderLive(); renderEta(); updateGlow();
+    if (beamMode === 'compass' && !compassFresh() && beamMarker) { beamMarker.setOpacity(0); beamMode = null; beamAngle = null; }   // kompas przestał podawać dane
+  }, 1000);   // odświeża "X sekund temu" i ETA między pobraniami
+})();
+</script>
+</body>
+</html>
