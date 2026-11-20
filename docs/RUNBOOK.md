@@ -6,7 +6,7 @@ Wersja robocza z 2026-11-20. Adresy i sekrety uzupełniasz w sekcji 1, **poza re
 
 1. **Dzień przed:** wyeksportuj trasę z MapMyRun (GPX), przygotuj `poi.json`, wgraj oba przez stronę `upload`, sprawdź mapę.
 2. **Przed wyjściem:** naładuj telefon, sprawdź ustawienia Traccar Client, wyślij testową pozycję.
-3. **Na zbiórce:** włącz „Continuous tracking", sprawdź na drugim telefonie, że WnB widać na mapie, wyślij link Uczestnikom.
+3. **Na starcie przejazdu:** włącz „Continuous tracking" (śledzenie włączasz dopiero na przejeździe), sprawdź na drugim telefonie, że WnB widać na mapie, wyślij link Uczestnikom.
 4. **W trakcie:** nie zamykaj Traccar Client. Gdy znacznik WnB znika, patrz sekcja 5.
 5. **Po przejeździe:** wyłącz „Continuous tracking". Opcjonalnie usuń trasę przez stronę `upload`.
 
@@ -60,14 +60,14 @@ Sekrety przechowuj w menedżerze haseł. To jedyne zabezpieczenie: kto zna adres
 
 ### 3.3 Telefon z Traccar Client (iPhone)
 - [ ] Naładowany telefon. Z testów: śledzenie zużywa ok. 7 punktów procentowych baterii na godzinę, plus Twoje filmowanie i rozmowy. Na 3 godziny zaplanuj zapas.
-- [ ] Ustawienia aplikacji: **Server URL** = adres `ingest`, **Location accuracy: High**, **Distance: 25**, Stop detection i Stationary heartbeat jak w testach (heartbeat domyślny; podczas postoju aplikacja sama wysyła sygnał co ok. 5 minut), **Offline buffering** włączony.
+- [ ] Ustawienia aplikacji: **Server URL** = adres `ingest`, **Location accuracy: High**, **Distance: 25**, **Stop detection: wyłączony** (tak było we wszystkich testach), Stationary heartbeat domyślny (podczas postoju aplikacja sama wysyła sygnał co ok. 5 minut), **Offline buffering** włączony.
 - [ ] Lokalizacja dla aplikacji: **„Zawsze"** i **dokładna lokalizacja** włączona (Ustawienia → Traccar Client → Lokalizacja).
 - [ ] Zalecane (nie testowaliśmy każdego z osobna): włączone odświeżanie aplikacji w tle dla Traccar Client i wyłączony tryb niskiego zużycia energii.
 - [ ] Naciśnij **Send location** i sprawdź, że znacznik WnB pojawia się na stronie.
 
 ## 4. W trakcie przejazdu
 
-- **Start:** włącz **Continuous tracking** na zbiórce. Na drugim telefonie sprawdź, że znacznik i ogon się przesuwają.
+- **Start:** włącz **Continuous tracking** dopiero na przejeździe, nie wcześniej. Na drugim telefonie sprawdź, że znacznik i ogon się przesuwają.
 - Nie zamykaj Traccar Client i nie odpinaj telefonu od ładowarki w trakcie (jeśli jest podłączony, dobrze).
 - Pozycja jest wysyłana co ok. 25 m ruchu (w jeździe co 5–8 s). Na postoju aplikacja milknie i wysyła sygnał co ok. 5 minut.
 - **Co widzą Uczestnicy:**
@@ -92,7 +92,7 @@ Sekrety przechowuj w menedżerze haseł. To jedyne zabezpieczenie: kto zna adres
 | Pozycja się spóźnia | Zasięg. Aplikacja ma bufor offline i dośle zaległe punkty, gdy zasięg wróci. |
 | Znacznik „skacze" na starcie | Zła dokładność GPS tuż po włączeniu. Poczekaj 1–2 minuty na zewnątrz. |
 | Brak komunikatu o postoju, a stoisz długo | Normalne: po stronie strony „Postój" zależy od ostatniej prędkości. Co ok. 5 minut przychodzi sygnał z aplikacji. |
-| Plan awaryjny | **Glympse** (darmowy) udostępnij równolegle na pierwszych przejazdach, jak dotąd. |
+| Plan awaryjny | **Glympse** (darmowy), z którego korzystałeś dotychczas, możesz udostępnić równolegle jako zapasowy. |
 
 ## 6. Po przejeździe
 
