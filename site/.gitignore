@@ -1,0 +1,7 @@
+live/
+log/
+*.prev
+*.tmp
+*.lock
+site/ingest-*.php
+site/upload-*.php
