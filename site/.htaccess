@@ -1,0 +1,20 @@
+# .htaccess projektu (na serwerze plik musi nazywać się dokładnie ".htaccess")
+# Obowiązuje w tym folderze i wszystkich podfolderach.
+
+# Wyłącz pokazywanie zawartości katalogów (listingu plików)
+Options -Indexes
+
+# Zablokuj dostęp z przeglądarki do plików roboczych, logów i poprzednich wersji (.prev)
+<FilesMatch "\.(lock|tmp|log|prev)$">
+  Require all denied
+</FilesMatch>
+
+<IfModule mod_headers.c>
+  # Przeglądarka nie zgaduje typu pliku
+  Header set X-Content-Type-Options "nosniff"
+
+  # Pozycja WnB ma zawsze być sprawdzana na serwerze
+  <FilesMatch "^latest\.json$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+</IfModule>
