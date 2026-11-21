@@ -21,6 +21,9 @@ Options -Indexes
   # Przeglądarka nie zgaduje typu pliku
   Header set X-Content-Type-Options "nosniff"
 
+  # Nie indeksuj strony ani jej zasobów przez wyszukiwarki
+  Header set X-Robots-Tag "noindex, nofollow, noarchive"
+
   # Pozycja WnB ma zawsze być sprawdzana na serwerze
   <FilesMatch "^latest\.json$">
     Header set Cache-Control "no-cache, must-revalidate"
