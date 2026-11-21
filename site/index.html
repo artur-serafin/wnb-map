@@ -142,6 +142,57 @@ $('orgIcon').style.fill = COL.organizer; $('orgIcon').style.stroke = COL.outline
 
 // ---------- mapa ----------
 const map = L.map('map', { zoomControl: false }).setView([52.23, 21.01], 12);
+const mapEl = map.getContainer();
+let lastMapTap = null, pendingMapTap = null, mapZoomGesture = null;
+function mapTouchPoint(e) {
+  const r = mapEl.getBoundingClientRect();
+  return L.point(e.clientX - r.left, e.clientY - r.top);
+}
+function stopMapTouch(e) { e.preventDefault(); e.stopPropagation(); }
+window.addEventListener('pointerdown', e => {
+  if (e.pointerType !== 'touch' || !mapEl.contains(e.target)) return;
+  const point = mapTouchPoint(e), now = Date.now();
+  if (pendingMapTap) { pendingMapTap = null; lastMapTap = null; return; }
+  if (lastMapTap && now - lastMapTap.time <= 400 && point.distanceTo(lastMapTap.point) <= 32) {
+    stopMapTouch(e);
+    mapZoomGesture = { pointerId: e.pointerId, point, startY: e.clientY, startZoom: map.getZoom(), lastZoom: map.getZoom() };
+    lastMapTap = null;
+  } else {
+    pendingMapTap = { pointerId: e.pointerId, point, clientX: e.clientX, clientY: e.clientY, moved: false };
+    lastMapTap = null;
+  }
+}, true);
+window.addEventListener('pointermove', e => {
+  if (mapZoomGesture && e.pointerId === mapZoomGesture.pointerId) {
+    stopMapTouch(e);
+    const zoom = mapZoomGesture.startZoom + Math.round((mapZoomGesture.startY - e.clientY) / 100);
+    if (zoom !== mapZoomGesture.lastZoom) {
+      map.setZoomAround(mapZoomGesture.point, zoom, { animate: false });
+      mapZoomGesture.lastZoom = zoom;
+    }
+  } else if (pendingMapTap && e.pointerId === pendingMapTap.pointerId &&
+             Math.hypot(e.clientX - pendingMapTap.clientX, e.clientY - pendingMapTap.clientY) > 12) {
+    pendingMapTap.moved = true;
+    lastMapTap = null;
+  }
+}, true);
+window.addEventListener('pointerup', e => {
+  if (mapZoomGesture && e.pointerId === mapZoomGesture.pointerId) {
+    stopMapTouch(e);
+    if (mapZoomGesture.lastZoom === mapZoomGesture.startZoom) {
+      map.setZoomAround(mapZoomGesture.point, mapZoomGesture.startZoom + 1, { animate: false });
+    }
+    mapZoomGesture = null;
+  } else if (pendingMapTap && e.pointerId === pendingMapTap.pointerId) {
+    if (!pendingMapTap.moved) lastMapTap = { point: pendingMapTap.point, time: Date.now() };
+    pendingMapTap = null;
+  }
+}, true);
+window.addEventListener('pointercancel', e => {
+  if (mapZoomGesture && e.pointerId === mapZoomGesture.pointerId) mapZoomGesture = null;
+  if (pendingMapTap && e.pointerId === pendingMapTap.pointerId) pendingMapTap = null;
+  lastMapTap = null;
+}, true);
 map.attributionControl.setPosition('bottomleft');
 map.createPane('routePane').style.zIndex = 390;   // trasa pod ogonem i znacznikami WnB
 map.createPane('arrowPane').style.zIndex = 395;   // strzałki kierunku nad trasą
