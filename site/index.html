@@ -166,7 +166,7 @@ window.addEventListener('pointerdown', e => {
 window.addEventListener('pointermove', e => {
   if (mapZoomGesture && e.pointerId === mapZoomGesture.pointerId) {
     stopMapTouch(e);
-    const deltaY = mapZoomGesture.startY - e.clientY;
+    const deltaY = e.clientY - mapZoomGesture.startY;
     if (Math.abs(deltaY) <= 12) return;
     mapZoomGesture.moved = true;
     const zoom = mapZoomGesture.startZoom + deltaY / 100;
