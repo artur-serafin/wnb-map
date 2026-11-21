@@ -10,6 +10,7 @@ const CONFIG = {
 
   // ---------- Pliki ----------
   GPX_URL: 'data/WnB.gpx',          // plik z trasą (ścieżka względem strony)
+  NO_ROUTE_TITLE: 'Wtorek na Bulwarach', // tytuł trasy, gdy nie ma pliku GPX (np. w trakcie tworzenia trasy)
   LIVE_URL: 'live/latest.json',     // plik z pozycją WnB, tworzony przez skrypt ingest
   LANG_DIR: 'lang/',                // folder z plikami językowymi
   // UWAGA: długość ogona (ile sekund historii) ustawiasz po stronie serwera,
