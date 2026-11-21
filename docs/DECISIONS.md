@@ -48,3 +48,6 @@ Format: data – decyzja – powód – rozważane alternatywy
   błędu odczytu (FAIL_AFTER_POLLS=2). Leaflet zostaje na cdnjs (własna kopia
   odłożona). Dostępność kafelków OSM nie jest priorytetem. Wybór adresu
   docelowego na sam koniec.
+- 2026-11-20 – Adres docelowy: https://arturserafin.com/wnb/ (podfolder istniejącej domeny,
+  HTTPS, bez "test"). Nowe sekrety dla ingest i upload. wnb-test do usunięcia po testach
+  akceptacyjnych. index.html przekierowuje http na https (lokalizacja wymaga HTTPS).
