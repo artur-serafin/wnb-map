@@ -40,10 +40,10 @@ Priorytety: **M** = musi być przed wdrożeniem, **S** = powinno być, **N** = d
 
 ## Blok C: środowisko i wdrożenie
 
-- [ ] **C2 (M, C+A)** Struktura produkcyjna katalogów (strona, `data/`, `live/`, `lang/`, `ingest`) i przeniesienie z `wnb-test`
+- [ ] **C2 (M, C+A)** Struktura produkcyjna katalogów (strona, `data/`, `live/`, `lang/`, `ingest`) i przeniesienie z `wnb`
 - [ ] **C3 (M, A)** Zmiana adresu w Traccar Client na produkcyjny `ingest`
 - [x] **C4 (M, A)** Kod strony i pliki serwera w repozytorium GitHub (poza sekretem): `index.html`, `config.js`, `lang/`, `server/`, `.htaccess`
-- [ ] **C5 (M, A)** Sprzątanie środowiska testowego: usunięcie `log-….php`, `requests.log`, folderu `wnb-test`
+- [ ] **C5 (M, A)** Sprzątanie środowiska testowego: usunięcie `log-….php`, `requests.log`, folderu `wnb`
 - [ ] **C6 (N, A)** Automatyczne wdrażanie z GitHuba na OVH (GitHub Actions); na MVP wystarczy ręczny FTP
 - [ ] **C1 (M, A) – NA KONIEC** Wybór adresu docelowego (domena/subdomena/katalog) i certyfikat HTTPS; decyzja po poprawkach, dyskusjach i testach
 

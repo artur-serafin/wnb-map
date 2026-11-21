@@ -105,7 +105,7 @@ server/   wzorce skryptów PHP (bez sekretów)
 tools/    testy i symulator (k6)
 ```
 
-Wdrożenie ręczne przez FTP (prawdziwe skrypty z sekretem w nazwie istnieją tylko na serwerze). Środowisko testowe: folder `wnb-test`. Docelowy adres: do wyboru na końcu prac.
+Wdrożenie ręczne przez FTP (prawdziwe skrypty z sekretem w nazwie istnieją tylko na serwerze). Środowisko testowe: folder `wnb`. Docelowy adres: do wyboru na końcu prac.
 
 ## 8. Ograniczenia i ryzyka
 

@@ -6,7 +6,7 @@
 import http from 'k6/http';
 import { check } from 'k6';
 
-const BASE = 'https://arturserafin.com/wnb-test/';
+const BASE = 'https://arturserafin.com/wnb/';
 
 export const options = {
   scenarios: {

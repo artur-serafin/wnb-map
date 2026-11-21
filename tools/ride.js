@@ -3,7 +3,7 @@
 //
 // Plik WnB.gpx musi leżeć w tym samym folderze co ten skrypt.
 // Uruchomienie (jedna linia):
-//   k6 run -e INGEST_URL="https://arturserafin.com/wnb-test/ingest-TWOJ-SEKRET.php" ride.js
+//   k6 run -e INGEST_URL="https://arturserafin.com/wnb/ingest-TWOJ-SEKRET.php" ride.js
 // Opcje (dodaj kolejne -e):
 //   -e SPEED_KMH=18          prędkość jazdy (domyślnie 18)
 //   -e START_KM=5            od którego kilometra trasy zacząć (domyślnie 0)

@@ -3,13 +3,13 @@
 //  - "writer":  jeden wirtualny WnB wysyłający pozycję co 5 s do skryptu ingest
 //
 // Uruchomienie (adres ingest podajesz w poleceniu, nie w pliku):
-//   k6 run -e INGEST_URL="https://arturserafin.com/wnb-test/ingest-TWOJ-CIAG.php" load.js
+//   k6 run -e INGEST_URL="https://arturserafin.com/wnb/ingest-TWOJ-CIAG.php" load.js
 //
 // UWAGA: test zapisze sztuczne pozycje do live/latest.json i log/requests.log.
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 
-const BASE = 'https://arturserafin.com/wnb-test/';
+const BASE = 'https://arturserafin.com/wnb/';
 const LIVE_URL = BASE + 'live/latest.json';
 const INGEST_URL = __ENV.INGEST_URL;
 

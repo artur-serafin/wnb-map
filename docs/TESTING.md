@@ -1,6 +1,6 @@
 # TESTING: wyniki testów i plan testów
 
-Stan na 2026-11-20. Środowisko testowe: folder `wnb-test` na OVH Personal. Skróty: **K6** = test obciążeniowy (`tools/`), **SYM** = symulator przejazdu (`ride.js`), **TEL** = ręczny test Artura na iPhonie, **PHP** = test skryptu serwerowego w wierszu poleceń, **MAT** = test logiki na przykładach (kod uruchomiony poza przeglądarką).
+Stan na 2026-11-20. Środowisko testowe: folder `wnb` na OVH Personal. Skróty: **K6** = test obciążeniowy (`tools/`), **SYM** = symulator przejazdu (`ride.js`), **TEL** = ręczny test Artura na iPhonie, **PHP** = test skryptu serwerowego w wierszu poleceń, **MAT** = test logiki na przykładach (kod uruchomiony poza przeglądarką).
 
 ## 1. Zrobione testy i wyniki
 
@@ -47,7 +47,7 @@ Niepoprawny odczyt (jeden na ok. 6900): hipoteza to wyścig odczytu z podmianą 
 
 ## 2. Lista testów akceptacyjnych (E1)
 
-Wykonaj najpierw w `wnb-test`, a po przeniesieniu na adres docelowy powtórz skróconą wersję (punkty oznaczone ★).
+Wykonaj najpierw w `wnb`, a po przeniesieniu na adres docelowy powtórz skróconą wersję (punkty oznaczone ★).
 
 **Urządzenia:** iPhone (Safari) ✔ podstawowo, Android (Chrome) ☐, komputer ☐.
 

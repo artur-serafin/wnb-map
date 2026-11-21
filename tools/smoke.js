@@ -12,7 +12,7 @@ export const options = {
   },
 };
 
-const URL = 'https://arturserafin.com/wnb-test/live/latest.json';
+const URL = 'https://arturserafin.com/wnb/live/latest.json';
 
 export default function () {
   const r = http.get(URL + '?t=' + Date.now());
