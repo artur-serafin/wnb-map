@@ -5,3 +5,5 @@ log/
 *.lock
 site/ingest-*.php
 site/upload-*.php
+logo_biale.png
+!site/logo_biale.png

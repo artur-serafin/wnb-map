@@ -12,7 +12,7 @@ if (window.location.protocol === 'http:') {
 <title>Wtorek na Bulwarach — przejazdy rolkowe</title>
 <meta name="description" content="Wspólne przejazdy rolkowe w Warszawie. Dołącz do Wtorku na Bulwarach.">
 <meta name="theme-color" content="#14213d">
-<link rel="icon" href="favicon.png" type="image/png" sizes="128x128">
+<link rel="icon" href="WnB_logo.svg" type="image/svg+xml">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Wtorek na Bulwarach — przejazdy rolkowe">
 <meta property="og:description" content="Sprawdź trasę i aktualną pozycję WnB podczas wspólnego przejazdu w Warszawie.">
@@ -28,6 +28,7 @@ if (window.location.protocol === 'http:') {
   body { display: flex; flex-direction: column; font: 16px/1.4 system-ui, sans-serif; }
   header, .fabs, #menuLayer, .leaflet-control { touch-action: manipulation; }
   header { display: flex; align-items: center; gap: .5rem; padding: .5rem .9rem; padding-top: calc(.5rem + env(safe-area-inset-top, 0px)); background: #14213d; color: #fff; }
+  .brandLogo { flex: none; width: 32px; height: 32px; object-fit: contain; }
   header h1 { flex: 1; min-width: 0; font-size: 1rem; margin: 0; font-weight: 600; }
   .burger { flex: none; width: 40px; height: 40px; margin: -.35rem -.5rem -.35rem 0; padding: 0; display: grid; place-items: center; border: 0; background: transparent; color: #fff; }
   .burger svg, .fab svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
@@ -73,6 +74,7 @@ if (window.location.protocol === 'http:') {
 </head>
 <body>
 <header>
+  <img class="brandLogo" src="WnB_logo.svg" alt="" aria-hidden="true">
   <h1 id="title">…</h1>
   <button class="burger" id="btnMenu" aria-haspopup="dialog" aria-expanded="false" aria-controls="menu"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
 </header>
