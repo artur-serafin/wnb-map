@@ -88,7 +88,7 @@ Odrzucone: wykrywanie zmiany trasy na otwartych stronach (nowa trasa po odświe�
 - [ ] Pomiar baterii przy pełnych 3 godzinach udostępniania
 - [ ] A5: własna kopia Leafleta na OVH zamiast cdnjs (ewentualnie suma kontrolna SRI przy cdnjs)
 - [ ] A6: szybsze odświeżenie po powrocie do karty i blokada wygaszania ekranu (Wake Lock)
-- [ ] A7: podgląd linku przy wklejeniu na grupie (tytuł, obrazek), favicon
+- [x] A7: podgląd linku przy wklejeniu na grupie (tytuł, obrazek), favicon; po wyborze domeny ustawić absolutny adres obrazka i sprawdzić podgląd w docelowej grupie
 - [ ] Własne mapy (PMTiles na OVH) jako alternatywa dla kafelków OSM; wymagane też dla trybu offline
 - [ ] Tryb offline (wymaga własnych map; na kafelkach OSM zabroniony)
 - [ ] Wiele tras / archiwum tras
