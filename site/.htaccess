@@ -1,6 +1,14 @@
 # .htaccess projektu (na serwerze plik musi nazywać się dokładnie ".htaccess")
 # Obowiązuje w tym folderze i wszystkich podfolderach.
 
+# Jeśli strona jest otwarta przez HTTP, przekieruj ją na HTTPS.
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !^https$
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L,NE]
+</IfModule>
+
 # Wyłącz pokazywanie zawartości katalogów (listingu plików)
 Options -Indexes
 
