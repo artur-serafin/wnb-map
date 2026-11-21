@@ -141,7 +141,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') toggleMenu(f
 $('orgIcon').style.fill = COL.organizer; $('orgIcon').style.stroke = COL.outline;
 
 // ---------- mapa ----------
-const map = L.map('map', { zoomControl: false }).setView([52.23, 21.01], 12);
+const map = L.map('map', { zoomControl: false, zoomSnap: 0 }).setView([52.23, 21.01], 12);
 const mapEl = map.getContainer();
 let lastMapTap = null, pendingMapTap = null, mapZoomGesture = null;
 function mapTouchPoint(e) {
@@ -155,7 +155,8 @@ window.addEventListener('pointerdown', e => {
   if (pendingMapTap) { pendingMapTap = null; lastMapTap = null; return; }
   if (lastMapTap && now - lastMapTap.time <= 400 && point.distanceTo(lastMapTap.point) <= 32) {
     stopMapTouch(e);
-    mapZoomGesture = { pointerId: e.pointerId, point, startY: e.clientY, startZoom: map.getZoom(), lastZoom: map.getZoom() };
+    const zoom = map.getZoom();
+    mapZoomGesture = { pointerId: e.pointerId, center: map.getCenter(), startY: e.clientY, startZoom: zoom, lastZoom: zoom, moved: false };
     lastMapTap = null;
   } else {
     pendingMapTap = { pointerId: e.pointerId, point, clientX: e.clientX, clientY: e.clientY, moved: false };
@@ -165,9 +166,12 @@ window.addEventListener('pointerdown', e => {
 window.addEventListener('pointermove', e => {
   if (mapZoomGesture && e.pointerId === mapZoomGesture.pointerId) {
     stopMapTouch(e);
-    const zoom = mapZoomGesture.startZoom + Math.round((mapZoomGesture.startY - e.clientY) / 100);
+    const deltaY = mapZoomGesture.startY - e.clientY;
+    if (Math.abs(deltaY) <= 12) return;
+    mapZoomGesture.moved = true;
+    const zoom = mapZoomGesture.startZoom + deltaY / 100;
     if (zoom !== mapZoomGesture.lastZoom) {
-      map.setZoomAround(mapZoomGesture.point, zoom, { animate: false });
+      map.setView(mapZoomGesture.center, zoom, { animate: false });
       mapZoomGesture.lastZoom = zoom;
     }
   } else if (pendingMapTap && e.pointerId === pendingMapTap.pointerId &&
@@ -179,8 +183,8 @@ window.addEventListener('pointermove', e => {
 window.addEventListener('pointerup', e => {
   if (mapZoomGesture && e.pointerId === mapZoomGesture.pointerId) {
     stopMapTouch(e);
-    if (mapZoomGesture.lastZoom === mapZoomGesture.startZoom) {
-      map.setZoomAround(mapZoomGesture.point, mapZoomGesture.startZoom + 1, { animate: false });
+    if (!mapZoomGesture.moved) {
+      map.setView(mapZoomGesture.center, mapZoomGesture.startZoom + 1, { animate: false });
     }
     mapZoomGesture = null;
   } else if (pendingMapTap && e.pointerId === pendingMapTap.pointerId) {
