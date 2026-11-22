@@ -64,7 +64,7 @@ const CONFIG = {
   TILE_URL: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', // źródło kafelków mapy
   TILE_ATTRIBUTION: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors', //kafelki od OSM
 
-  //TILE_URL: 'https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=cb1_5dj7_1_3ed3cf2fc43cdbff61613eb6',  // kafelki mapy Carto Voyager)
+  //TILE_URL: 'https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=[carto-key]',  // kafelki mapy Carto Voyager)
   //TILE_ATTRIBUTION: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, © <a href="https://carto.com/attributions">CARTO</a>',  // kafelki od CARTO
   MAX_ZOOM: 19,                     // największe dozwolone przybliżenie
   FOCUS_ZOOM: 16,                   // przybliżenie po naciśnięciu przycisku "Moja pozycja" / "WnB"
