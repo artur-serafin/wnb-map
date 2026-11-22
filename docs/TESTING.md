@@ -103,3 +103,23 @@ k6 run -e INGEST_URL="https://…/ingest-<SEKRET>.php" -e START_KM=9 -e STOPS="1
 ## 5. Niezweryfikowane
 
 Android i komputer, zachowanie w tle na iPhonie przez pełne 3 godziny, kierunek z GPS i kompas w prawdziwym ruchu, dokładność ETA, progi czasowe na prawdziwych światłach, wygląd na jasnym słońcu, tryb niskiego zużycia energii w iOS oraz limity wgrywania plików na hostingu przy dużych plikach.
+
+## 6. Testy akceptacyjne trybu edycji POI
+
+| # | Scenariusz | iPhone | Android | Komputer |
+|---|---|---|---|---|
+| H1 | Niepoprawny sekret nie otwiera trybu edycji i nie pozwala save | ☐ | ☐ | ☐ |
+| H2 | Poprawny sekret otwiera tryb; normalne menu i fabs są ukryte, widoczne są close i save | ☐ | ☐ | ☐ |
+| H3 | Long-press pustej mapy dodaje dokładnie jeden POI `default` z pustym km i ostatnim `order` | ☐ | ☐ | ☐ |
+| H4 | Long-press znacznika otwiera edycję; strzałka i ogon POI nie są klikalne | ☐ | ☐ | ☐ |
+| H5 | Press+move przesuwa tylko POI; po puszczeniu współrzędne są lokalnie nowe, mapa nie została przesunięta | ☐ | ☐ | ☐ |
+| H6 | Drag do krawędzi przesuwa mapę i pozwala kontynuować przesuwanie POI poza początkowy ekran | ☐ | ☐ | ☐ |
+| H7 | Edycja typu, nazwy i km działa; typ `default` pokazuje cyfrę `order`, typ bez kolejności nie pokazuje cyfry | ☐ | ☐ | ☐ |
+| H8 | Zmiana kolejności przesuwa punkt i normalizuje pozostałe do ciągu 1…N | ☐ | ☐ | ☐ |
+| H9 | Close odrzuca wszystkie zmiany bez pytania i wraca do normalnego widoku | ☐ | ☐ | ☐ |
+| H10 | Save zachowuje `.prev`, podmienia `poi.json` atomowo i odświeża stan bez refreshu | ☐ | ☐ | ☐ |
+| H11 | Utrata sieci podczas save zostawia zmiany lokalne i pokazuje czytelny błąd | ☐ | ☐ | ☐ |
+| H12 | Usunięcie POI renumeruje pozostałe punkty | ☐ | ☐ | ☐ |
+| H13 | POI jest widoczny przy 404 GPX; bez trasy brak fit i ETA | ☐ | ☐ | ☐ |
+| H14 | Jeden POI bez `km` wyłącza ETA dla wszystkich POI i mety; po uzupełnieniu km ETA wraca | ☐ | ☐ | ☐ |
+| H15 | Upload samych POI nie usuwa GPX; upload samego GPX usuwa stare POI; delete usuwa oba pliki i nie zwraca błędu przy braku jednego pliku | ☐ | ☐ | ☐ |

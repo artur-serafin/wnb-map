@@ -41,6 +41,7 @@ Cechy: brak logowania Uczestników, brak bazy danych, pozycje Uczestników nigdz
 | `ingest-<sekret>.php` | PHP | przyjmuje POST, waliduje, aktualizuje `live/latest.json` |
 | `live/latest.json` | plik statyczny | bieżąca pozycja i ogon 120 s |
 | `upload-<sekret>.php` | PHP | formularz wgrywania/usuwania trasy i POI, walidacja, kopie `.prev` |
+| `update-<sekret>.php` | PHP | opcjonalny endpoint trybu edycji: verify/save POI, walidacja i atomowa podmiana |
 | `data/WnB.gpx`, `data/poi.json` | pliki statyczne | bieżąca trasa i punkty |
 | `index.html` + `config.js` + `lang/*.json` | HTML/JS, Leaflet 1.9.4 | cała logika po stronie przeglądarki |
 | `.htaccess` | Apache | brak listingu, blokada `*.lock/.tmp/.log/.prev`, `nosniff`, `no-cache` dla `latest.json` |
@@ -59,7 +60,7 @@ Zewnętrzne zależności: kafelki OpenStreetMap (bez gwarancji dostępności, wy
 
 **Strona.** Po otwarciu: język, trasa (`data/WnB.gpx`, pierwszy `trk`, kolejne identyczne punkty pomijane), punkty POI (tylko gdy jest trasa), start lokalizacji Uczestnika. Potem co 8 s pobranie `latest.json` (`?t=…`, `cache: no-store`); wiek pozycji liczony względem czasu serwera z nagłówka `Date`, a nie zegara telefonu. Pojedynczy błąd pobrania jest ignorowany, komunikat o braku połączenia po 2 z rzędu.
 
-**Trasa.** `upload` waliduje plik przed zapisem (poprawny XML, `trk` z ≥ 2 różnymi punktami, współrzędne, ≤ 5000 punktów, ≤ 2 MB, brak DOCTYPE/ENTITY; POI: lista, znany typ, pozycja, `km`), kopiuje poprzednią wersję do `.prev` i podmienia plik atomowo. Nowy GPX bez nowego `poi.json` usuwa punkty. Brak pliku trasy (404) to stan celowy: strona pokazuje tylko pozycję WnB.
+**Trasa i POI.** `upload` waliduje plik przed zapisem (poprawny XML, `trk` z ≥ 2 różnymi punktami, współrzędne, ≤ 5000 punktów, ≤ 2 MB, brak DOCTYPE/ENTITY; POI: lista, znany typ, pozycja, opcjonalny `km`), kopiuje poprzednią wersję do `.prev` i podmienia plik atomowo. Zapisanie samego POI zastępuje tylko `poi.json` i zostawia GPX. Zapisanie GPX zastępuje trasę i usuwa dotychczasowe POI, ponieważ stare punkty mogą nie odpowiadać nowej mapie. Usunięcie usuwa oba pliki. Brak pliku trasy (404) jest stanem celowym: mapa nadal może pokazywać POI, bez kilometra trasy i ETA.
 
 ## 4. Logika po stronie przeglądarki (wszystko w `index.html`)
 
@@ -115,3 +116,108 @@ Wdrożenie ręczne przez FTP (prawdziwe skrypty z sekretem w nazwie istnieją ty
 - Kierunek z kompasu zależy od telefonu i kalibracji; iPhone wymaga zgody po dotknięciu; sprawdzony tylko matematycznie, do potwierdzenia w terenie.
 - Przeglądarka Uczestnika wstrzymuje stronę po wygaszeniu ekranu.
 - Zależność od jednego hostingu współdzielonego, bez monitoringu.
+
+## 9. Tryb edycji POI i zapis bez trasy
+
+### 9.1 Model danych POI
+
+```json
+[
+  {
+    "type": "default",
+    "name": "Punkt 1",
+    "pos": "52.227726011123586, 20.99311199679942",
+    "order": 1,
+    "km": ""
+  }
+]
+```
+
+- `pos` albo `lat`/`lon` opisują pozycję.
+- `type` jest opcjonalny i normalizowany do `default`, gdy jest pusty albo nieznany.
+- `order` jest opcjonalny. Zapis edytora normalizuje punkty do kolejności `1...N`.
+- `km` jest opcjonalny i może być liczbą albo tekstem z przecinkiem. Puste pole oznacza „bez kilometra".
+- Dla punktu bez `order` znacznik nie pokazuje cyfry. Dla punktu bez `km` dymek nie pokazuje kilometra.
+
+### 9.2 Stan strony
+
+Strona ma dwa stany: normalny widok i tryb edycji. Tryb edycji nie zmienia danych na dysku ani w
+`live/latest.json`. W pamięci przeglądarki istnieje jedna lokalna lista POI:
+
+1. po wejściu do trybu edycji lista jest pobrana z `poi.json`,
+2. lista może być lokalnie dodawana, usuwana, przenumerowana i przesuwana,
+3. zamknięcie trybu odrzuca lokalną kopię,
+4. przycisk save wysyła całą listę do endpointu,
+5. dopiero poprawna odpowiedź serwera zastępuje stan Ekranu i kończy sesję niesaved changes.
+
+Nie są wykonywane częściowe zapisy ani natychmiastowe zapisy po każdym przesunięciu.
+
+### 9.3 Autoryzacja trybu edycji
+
+URL ma postać `https://arturserafin.com/wnb/?s=SEKRET` w przypadku docelowej lokalizacji. Sekret:
+
+- jest sprawdzany żądaniem `POST` do `update-<SEKRET>.php` z akcją `verify`,
+- jest ponownie wymagany w żądaniu `save`,
+- jest porównywany stałym czasem i nigdy nie trafia do `poi.json`, `config.js` ani repozytorium,
+- nie daje prawa wysyłania niepoprawnej lub zbyt dużej listy POI.
+
+Proponowana komunikacja:
+
+```http
+POST /update-<SEKRET>.php
+Content-Type: application/json
+
+{"action":"verify","secret":"..."}
+```
+
+```http
+POST /update-<SEKRET>.php
+Content-Type: application/json
+
+{"action":"save","secret":"...","pois":[...]}
+```
+
+Odpowiedzi: `200` verify/save, `401` niepoprawny sekret, `422` niepoprawny model POI,
+`413` zbyt duży JSON, `500` błąd zapisu. Save musi używać tego samego lock/parzystej podmiany co
+pozostałe pliki danych. `.prev` jest tworzone przed atomową podmianą.
+
+### 9.4 Edycja gestów
+
+Warstwa edytora korzysta z Pointer Events i ma osobny rejestr znaczników POI. Próg long-press:
+
+- domyślnie 650 ms i ruch poniżej 10 px,
+- na pustej mapie po przerwaniu long-press tworzy jeden punkt na dokładnym `LatLng`,
+- na znaczniku otwiera pop-over edycji,
+- podczas ruchu po znaczniku pracuje osobny tryb drag; mapa nie reaguje na ten sam gest.
+
+Drag:
+
+- punkt przesuwa się tak, aby jego wskazywany punkt znajdował się pod wskaźnikiem;
+- strzałka i trasa pod znacznikiem nie są tą samą strefą kliknięcia,
+- jeśli wskaźnik dotrze do krawędzi widoku, mapa przesuwa się powoli w tym kierunku,
+- po puszczeniu współrzędne są dopisywane tylko do lokalnej kopii.
+
+Normalny widok zachowuje dotychczasową klikalność znacznika (dymek) i pomija klikalność strzałki.
+
+### 9.5 Kolejność i ETA
+
+UI nie pozwala wpisać kolejności. Lista dostępnych wartości to `1...N`, gdzie `N` to bieżąca liczba
+punktów. Wybór pozycji `k` przesuwa edytowany punkt na `k`, przesuwa elementy pomiędzy starym i
+nowym indexem i normalizuje ciąg. Oznacza to np. zmianę punktu 4 na pozycję 1 jako:
+`[4,1,2,3]`.
+
+Renderuje się wszystkie punkty, niezależnie od obecności trasy i kilometra. ETA jest wyłączane globalnie,
+gdy którykolwiek punkt ma brak, pustą wartość lub niepoprawny `km`. Gdy wszystkie punkty mają
+poprawne km, dotychczasowa logika ETA działa z trasy. Bez trasy ETA nigdy nie działa, nawet gdy
+wszystkie punkty mają liczby w `km`.
+
+### 9.6 Wgrywanie i usuwanie
+
+Upload może wysłać pojedynczo GPX lub POI:
+
+- sam POI zastępuje tylko `poi.json` i nie zmienia ani nie usuwa `WnB.gpx`,
+- sam GPX zastępuje `WnB.gpx` i usuwa istniejące `poi.json`,
+- wgranie GPX i POI razem zastępuje obie dane,
+- przy usunięciu każdy istniejący plik jest usuwany osobno i brak drugiego pliku nie jest błędem.
+
+Stare POI są usuwane przy nowej trasie, ponieważ nowe punkty powinny odnosić się do nowej mapy.

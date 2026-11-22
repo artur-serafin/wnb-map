@@ -51,3 +51,21 @@ Format: data – decyzja – powód – rozważane alternatywy
 - 2026-11-20 – Adres docelowy: https://arturserafin.com/wnb/ (podfolder istniejącej domeny,
   HTTPS, bez "test"). Nowe sekrety dla ingest i upload. wnb-test do usunięcia po testach
   akceptacyjnych. index.html przekierowuje http na https (lokalizacja wymaga HTTPS).
+- 2026-11-22 – Tryb edycji POI jest osobnym stanem sesji strony, bez logowania i bazy danych.
+  Wejście i zapis wymagają sekretu. Sekret jest przesłany jawnie do dedykowanego endpointu
+  `update-<SEKRET>.php`, ale tylko prawdziwa nazwa pliku i nieujawniony sekret trafiają na
+  serwer; `index.html` i dokumentacja nie zawierają prawdziwego sekretu.
+  Alternatywa z logowaniem administratora została odrzucona jako zbyt duży koszt i zależność
+  dla jednorazowego narzędzia organizatora.
+- 2026-11-22 – Pola POI: `order` jest opcjonalnym dodatnim całkowitoliczbowym indeksem,
+  `type` przyjmuje `zabka`, `lody` lub `default`, a brak/nieznana wartość jest normalizowana
+  do `default`. UI przenosi element i normalizuje pozostałe wartości do ciągu 1…N.
+  Sam JSON może zawierać brakujące `order` i `km`; plik zapisany przez edytor normalizuje
+  kolejność wszystkich istniejących punktów.
+- 2026-11-22 – Brak któregokolwiek poprawnego kilometra wyłącza ETA dla całego zestawu.
+  Punkt bez kilometra może istnieć na mapie bez trasy i nie uniemożliwia jej odczytu
+  przez pozostałe punkty. Jest to bezpieczniejsze niż domysł, który punkt jest wcześniejszy.
+- 2026-11-22 – Edycja POI korzysta z Pointer Events i lokalnej kopii listy. Długi dotyk
+  mapy/znacznika i press+move są obsługiwane w jednej warstwie edytora; normalny widok
+  Leafleta zostaje bez zmian. Save jest atomowym zastąpieniem całego `poi.json` z kopią
+  `.prev`, a zamknięcie trybu odrzuca niesaved changes bez pytania.

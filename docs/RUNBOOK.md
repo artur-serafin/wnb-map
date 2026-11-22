@@ -40,23 +40,37 @@ Sekrety przechowuj w menedżerze haseł. To jedyne zabezpieczenie: kto zna adres
 - [ ] Narysuj trasę w MapMyRun i wyeksportuj jako **GPX**. Nazwa trasy w MapMyRun (np. „Wtorek na Bulwarach #254") staje się tytułem na stronie. Plik musi zawierać **ślad** (`trk`); sama „trasa" (`rte`) jest odrzucana.
 - [ ] Przygotuj `poi.json` (sekcja 3.2) albo zdecyduj, że punktów nie będzie.
 - [ ] Otwórz stronę `upload`, wybierz **GPX i `poi.json` razem**, naciśnij „Wgraj". Sprawdź potwierdzenie (tytuł, kilometry, liczba punktów).
-- [ ] **Uwaga:** nowy GPX **bez** pliku POI usuwa wszystkie dotychczasowe punkty. Poprzednie zostają w `poi.json.prev`.
+- [ ] **Uwaga:** nowy GPX usuwa wszystkie dotychczasowe punkty. Poprzednie zostają w `poi.json.prev`. Załącz nowy `poi.json`, jeśli po zmianie trasy chcesz od razu wgrać nowe punkty.
 - [ ] Otwórz stronę Uczestników i sprawdź: tytuł z długością, trasa ze strzałkami, start i meta, punkty POI.
 
 ### 3.2 Punkty POI (`poi.json`)
 
 ```json
 [
-  { "type": "zabka", "name": "Żabka – przykład", "pos": "52.2184058, 21.0151354", "km": "12,524" },
-  { "type": "lody",  "name": "Lody – przykład",  "lat": 52.2301, "lon": 21.0122, "km": 17.480 }
+  { "type": "zabka", "name": "Żabka – przykład", "pos": "52.2184058, 21.0151354", "km": "12,524", "order": 1 },
+  { "type": "lody",  "name": "Lody – przykład",  "lat": 52.2301, "lon": 21.0122, "km": 17.480, "order": 2 },
+  { "type": "default", "name": "Miejsce spotkania", "pos": "52.2251, 21.0102", "order": 3 }
 ]
 ```
 
-- `type`: `zabka` (planowy postój w sklepie) albo `lody` (planowy postój na lody).
+- `type`: `zabka` (planowy postój w sklepie), `lody` (planowy postój na lody) albo `default` (kółko bez grafiki).
+- Brak `type` lub nieznana wartość oznacza `default`.
+- `order`: opcjonalna kolejność jako liczba `1`, `2`, `3` itd. Punkt bez `order` nie pokazuje cyfry w środku.
 - Pozycja: `pos` wklejone z Google Maps (prawy przycisk na mapie, pierwsza linia) **albo** `lat` i `lon`.
-- `km`: kilometr trasy z dokładnością do metra. **Odczytaj go z mapy**: dotknij trasy w miejscu punktu, a dymek pokaże np. „12 km 524 m". Zapisz jako `"12,524"` (z przecinkiem tylko w cudzysłowie) albo `12.524` (z kropką, bez cudzysłowu).
-- Bez `km` punkt będzie widoczny, ale nie dostanie ETA. Skrypt `upload` odrzuci plik z błędami i wypisze, co poprawić.
+- `km`: opcjonalny kilometr trasy z dokładnością do metra. **Odczytaj go z mapy**: dotknij trasy w miejscu punktu, a dymek pokaże np. „12 km 524 m". Zapisz jako `"12,524"` (z przecinkiem tylko w cudzysłowie) albo `12.524` (z kropką, bez cudzysłowu).
+- Bez `km` punkt będzie widoczny, ale nie dostanie ETA. Jeżeli jeden z punktów nie ma `km`, ETA zostaje wyłączone dla wszystkich punktów i mety.
 - W miejscach, gdzie trasa przecina samą siebie, dymek pokazuje kilka kilometrów. Wybierz ten, który odpowiada Twojemu kierunkowi jazdy.
+
+### 3.3 Tryb edycji POI na mapie
+
+1. Otwórz stronę z URL zawierającym aktualny sekret edycji: `https://arturserafin.com/wnb/?s=SEKRET`.
+2. Strona sprawdzi sekret na serwerze i przejdzie w tryb edycji.
+3. Długi dotyk pustej części mapy dodaje punkt `default` z ostatnią kolejnością.
+4. Długi dotyk istniejącego znacznika otwiera edycję; press+move przesuwa punkt na mapie.
+5. W pop-overze zmień nazwę, typ, kolejność i kilometr albo usuń punkt.
+6. Zmiany są lokalne do momentu naciśnięcia save. Krzyżyk zamyka tryb i odrzuca zmiany bez pytania.
+7. Save ponownie weryfikuje sekret i atomowo zastępuje `poi.json`.
+8. W przypadku błędu sekretu lub zapisu nic nie ginie z ekranu edycji.
 
 ### 3.3 Telefon z Traccar Client (iPhone)
 - [ ] Naładowany telefon. Z testów: śledzenie zużywa ok. 7 punktów procentowych baterii na godzinę, plus Twoje filmowanie i rozmowy. Na 3 godziny zaplanuj zapas.

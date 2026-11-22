@@ -8,7 +8,7 @@ Stan na 2026-11-20. **Organizator (WnB)** udostępnia pozycję i wgrywa trasę, 
 | ID | Wymaganie | Weryfikacja |
 |---|---|---|
 | F-01 | Organizator wgrywa jeden aktualny plik GPX; nowy plik zastępuje stary | TEL |
-| F-02 | Organizator może usunąć trasę; przejazd bez trasy jest dopuszczalny i nie pokazuje błędu, POI ani ETA | TEL |
+| F-02 | Organizator może usunąć trasę i POI; przejazd bez trasy jest dopuszczalny i może pokazywać POI, ale bez ETA i kilometra trasy | TEL |
 | F-03 | Tytuł trasy pochodzi z nazwy w pliku GPX, razem z długością | TEL |
 | F-04 | Trasa jest rysowana na mapie 1:1 jak w pliku (nie przyciągana do ulic), ze strzałkami kierunku oraz oznaczeniem startu i mety | TEL |
 | F-05 | Dotknięcie trasy pokazuje jej kilometr (np. „12 km 524 m"); w miejscach przecięcia trasy kilka wartości | TEL |
@@ -45,9 +45,22 @@ Stan na 2026-11-20. **Organizator (WnB)** udostępnia pozycję i wgrywa trasę, 
 | ID | Wymaganie | Weryfikacja |
 |---|---|---|
 | F-40 | Strona `upload` (z sekretem w adresie): wgranie GPX i `poi.json`, usunięcie, walidacja, potwierdzenie | TEL |
-| F-41 | Nowy GPX bez `poi.json` usuwa stare punkty; przechowywana jest jedna poprzednia wersja (`.prev`) | TEL |
+| F-41 | Nowy GPX usuwa stare punkty POI; sam POI nie usuwa ani nie zastępuje GPX; usunięcie może usunąć trasę i POI razem; przechowywana jest jedna poprzednia wersja (`.prev`) | TEL |
 | F-42 | Interfejs po polsku i angielsku, teksty w plikach językowych; menu z wyborem języka i informacją o prywatności | TEL |
 | F-43 | Wszystkie progi i ustawienia w jednym pliku `config.js` z komentarzami | TEL |
+
+### Punkty POI i tryb edycji
+| ID | Wymaganie | Weryfikacja |
+|---|---|---|
+| F-50 | Punkt POI może nie mieć `km`; punkty bez kilometra są widoczne na mapie także bez trasy | TEL |
+| F-51 | Jeżeli dowolny punkt POI nie ma poprawnego `km`, ETA nie jest pokazywane dla żadnego punktu ani mety | MAT, SYM |
+| F-52 | Typy POI: `zabka`, `lody`, `default`; brak lub nieznany typ jest interpretowany jako `default` | MAT, TEL |
+| F-53 | Opcjonalne pole `order` ustala kolejność i jest wyświetlane jako cyfra w znaczniku `default`; punkty bez `order` nie mają cyfry | TEL |
+| F-54 | Dostęp do trybu edycji wymaga poprawnego sekretu w URL i ponownej walidacji sekretu przy zapisaniu | TEL, PHP |
+| F-55 | Tryb edycji nie ma normalnego menu; umożliwia dodawanie, edycję i usuwanie POI oraz lokalny save/odrzucenie przez zamknięcie | TEL |
+| F-56 | Długi dotyk mapy tworzy jeden POI `default` z ostatnią kolejnością i pustym kilometrem; długi dotyk znacznika otwiera jego edycję | TEL |
+| F-57 | Press+move znacznika przesuwa tylko lokalny punkt POI i nie przesuwa mapy; przy krawędzi mapy może uruchomić przesuwanie widoku | TEL |
+| F-58 | Save zapisuje atomowo całą bieżącą listę POI do `poi.json`; porażka save zostawia lokalny stan edycji i plik serwerowy bez zmian | TEL, PHP |
 
 ## 2. Wymagania niefunkcjonalne i ograniczenia
 

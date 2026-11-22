@@ -1,6 +1,6 @@
 # Backlog – mapa przejazdu rolkowego
 
-Stan na 2026-11-18 (po zamknięciu bloku B). Odhaczanie: w GitHubie otwórz plik (ikona ołówka), zmień `[ ]` na `[x]`, zatwierdź zmianę (Commit changes).
+Stan na 2026-11-22. Odhaczanie: w GitHubie otwórz plik (ikona ołówka), zmień `[ ]` na `[x]`, zatwierdź zmianę (Commit changes).
 
 Priorytety: **M** = musi być przed wdrożeniem, **S** = powinno być, **N** = do rozważenia, można po wdrożeniu.
 „Kto": **C** = Claude przygotowuje pliki, **A** = Artur wgrywa/testuje/decyduje.
@@ -74,10 +74,31 @@ Kolejność: F1 → F7. F4 jest podstawą dla F5. Brak zmian po stronie serwera:
 
 ## Blok G: wgrywanie i usuwanie trasy
 
-- [x] **G1 (M, C)** Strona: brak trasy to stan celowy (404): bez komunikatu i błędu, bez POI, ETA, kilometra po dotknięciu i przycisku „Cała trasa"; pozycja WnB działa; opcjonalny `NO_ROUTE_TITLE`
-- [x] **G3 (M, C+A)** `upload-<sekret>.php`: formularz (GPX + opcjonalnie `poi.json`, przycisk usunięcia), nowy GPX bez nowych POI usuwa stare POI, walidacja przed podmianą, zapis atomowy, jedna kopia poprzedniej wersji (`.prev`), potwierdzenie (tytuł, długość, liczba punktów); wzorzec w repozytorium `server/upload-ZMIEN-MNIE.php`, sekret tylko na serwerze
+- [x] **G1 (M, C)** Strona: brak trasy to stan celowy (404): bez komunikatu i błędu, bez trasy i ETA, ale POI nadal może działać; kilometr trasy i przycisk „Cała trasa" są ukryte; pozycja WnB działa; opcjonalny `NO_ROUTE_TITLE`
+- [x] **G3 (M, C+A)** `upload-<sekret>.php`: formularz (GPX + opcjonalnie `poi.json`, przycisk usunięcia), nowe GPX usuwa stare POI, sam plik POI nie usuwa GPX, usunięcie może usunąć oba pliki, walidacja przed podmianą, zapis atomowy, jedna kopia poprzedniej wersji (`.prev`), potwierdzenie (tytuł, długość, liczba punktów); wzorzec w repozytorium `server/upload-ZMIEN-MNIE.php`, sekret tylko na serwerze
 - [x] **G4 (S, C)** `.htaccess`: blokada plików `.prev`
 - [ ] **G5 (S, C)** Procedura wgrywania trasy w `RUNBOOK.md` (eksport z MapMyRun, wgranie z telefonu, kontrola, przywrócenie poprzedniej wersji)
+
+## Blok H: tryb edycji punktów POI
+
+Kolejność: H1–H4 dane i serwer, H5–H10 mapa i gesty, H11–H13 zapis i testy, H14–H16 dokumentacja i wdrożenie.
+
+- [ ] **H1 (M, C)** Rozszerzyć model POI o opcjonalne pola `order` i `km`; typy: `zabka`, `lody`, `default`. Brak pola `type` i nieznany/nowy typ są traktowane jako `default` w przeglądarce i normalizowane do `default` przed zapisem.
+- [ ] **H2 (M, C)** Zmienić renderowanie POI: `default` to kółko bez grafiki z opcjonalną cyfrą kolejności; punkty bez `order` nie pokazują cyfry. Puste lub nieistniejące `km` nie powodują widocznego kilometra w dymku.
+- [ ] **H3 (M, C+A)** Poprawić stan bez trasy: POI są ładowane i pokazywane również wtedy, gdy `WnB.gpx` zwraca 404. Przy braku trasy nie pokazuje się kilometr trasy ani przycisk „Cała trasa", a ETA jest całkowicie wyłączone.
+- [ ] **H4 (M, C)** Zmienić regułę ETA: jeżeli chociaż jeden punkt POI ma puste lub niepoprawne `km`, ETA nie jest liczone dla żadnego punktu ani mety. Gdy wszystkie punkty mają poprawny `km`, zachować dotychczasową logikę ETA.
+- [ ] **H5 (M, C)** Dodać wejście w tryb edycji przez sekret w parametrze URL `?s=SEKRET` oraz osobny endpoint `update-<SEKRET>.php`. Endpoint najpierw weryfikuje sekret przed operacją verify/save i zwraca właściwy kod HTTP.
+- [ ] **H6 (M, C)** Napisać `update-<SEKRET>.php` z walidacją `poi.json`, atomowym zapisem do `data/poi.json`, kopią dotychczasowego pliku do `poi.json.prev`, limitem rozmiaru i odpowiedziami `JSON` dla sprawdzenia sekretu i błędów.
+- [ ] **H7 (M, C)** W trybie edycji ukryć normalne menu i przyciski, pokazując prawy górny przycisk zamknięcia (krzyżyk) oraz przycisk save ponad pozostałymi prawymi przyciskami.
+- [ ] **H8 (M, C)** Zaimplementować long-press na pustej części mapy: po ~650 ms utworzyć jeden POI `default` bez nazwy i kilometra, z ostatnim numerem kolejności. Punkt lokalizować w dokładnym miejscu dotknięcia.
+- [ ] **H9 (M, C)** Zaimplementować long-press na znaczniku POI: otworzyć edycję punktu. Kliknięcie zwykłe nadal otwiera zwykły dymek poza trybem edycji; strzałka/ogon znacznika nie może być elementem klikalnym ani uruchamiać edycji.
+- [ ] **H10 (M, C)** Zaimplementować press+move na znaczniku POI: zablokować przesuwanie mapy przez ten gest, przesuwać lokalny marker pod wskaźnikiem i przesuwać mapę brzegową, gdy wskaźnik dotrze do krawędzi ekranu. Po puszczeniu zapisać lokalną nową współrzędną, bez natychmiastowego zapisu.
+- [ ] **H11 (M, C)** W pop-overze edycji dodać pola: nazwa, typ (`default`, `zabka`, `lody`), kolejność (lista 1…N, bez wpisywania), kilometr trasy (tekst, przecinek lub kropka, opcjonalnie pusty) i usunięcie punktu.
+- [ ] **H12 (M, C)** Zmienić kolejność w trybie edycji przez przesunięcie punktu w nową pozycję i automatyczne przenumerowanie pozostałych punktów do ciągu 1…N. Zmiana kolejności musi być natychmiast widoczna na wszystkich znacznikach.
+- [ ] **H13 (M, C+A)** Wszystkie dodania, przeniesienia, edycje i usunięcia trzymać tylko w lokalnej kopii `poi.json` w pamięci przeglądarki aż do „save". Zamknięcie trybu odrzuca zmiany bez pytania. Save wysyła całą listę i po sukcesie odświeża lokalny stan z odpowiedzi serwera.
+- [ ] **H14 (S, C+A)** Obsłużyć błędy sekretu i zapisu: poprawny kod HTTP dla niepoprawnego sekretu, błąd walidacji, błąd serwera i brak zmiany pliku przy odrzuceniu zapisu. Lokalny stan POI pozostaje nietknięty po błędzie save.
+- [ ] **H15 (M, C+A)** Rozszerzyć upload trasy i usuwanie: sam POI zastępuje tylko POI i nie dotyka GPX; sam GPX zastępuje trasę i usuwa istniejące POI, bo stare punkty nie pasują do nowej mapy; usunięcie usuwa GPX i POI bez błędu, gdy któryś plik już nie istnieje.
+- [ ] **H16 (S, C+A)** Zaktualizować języki, `RUNBOOK.md`, `TESTING.md` i procedurę zmiany sekretu. Dodać testy na iOS/Android, brak trasy, brak kilometra, kolejność i utratę połączenia podczas save.
 
 Odrzucone: wykrywanie zmiany trasy na otwartych stronach (nowa trasa po odświeżeniu wystarcza).
 
