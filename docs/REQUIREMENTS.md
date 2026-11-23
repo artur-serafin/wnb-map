@@ -57,10 +57,12 @@ Stan na 2026-11-20. **Organizator (WnB)** udostępnia pozycję i wgrywa trasę, 
 | F-52 | Typy POI: `zabka`, `lody`, `default`; brak lub nieznany typ jest interpretowany jako `default` | MAT, TEL |
 | F-53 | Opcjonalne pole `order` ustala kolejność i jest wyświetlane jako cyfra w znaczniku `default`; punkty bez `order` nie mają cyfry | TEL |
 | F-54 | Dostęp do trybu edycji wymaga poprawnego sekretu w URL i ponownej walidacji sekretu przy zapisaniu | TEL, PHP |
-| F-55 | Tryb edycji nie ma normalnego menu; umożliwia dodawanie, edycję i usuwanie POI oraz lokalny save/odrzucenie przez zamknięcie | TEL |
+| F-55 | Tryb edycji zachowuje nagłówek; hamburger zostaje zastąpiony przyciskami save i zamknięcia trybu. Panel punktu można zamknąć bez zamykania całego trybu | TEL |
 | F-56 | Długi dotyk mapy tworzy jeden POI `default` z ostatnią kolejnością i pustym kilometrem; długi dotyk znacznika otwiera jego edycję | TEL |
 | F-57 | Press+move znacznika przesuwa tylko lokalny punkt POI i nie przesuwa mapy; przy krawędzi mapy może uruchomić przesuwanie widoku | TEL |
 | F-58 | Save zapisuje atomowo całą bieżącą listę POI do `poi.json`; porażka save zostawia lokalny stan edycji i plik serwerowy bez zmian | TEL, PHP |
+| F-59 | Po udanym save jest osobne dwusekundowe powiadomienie; zamknięcie trybu usuwa `s` z URL i przeładowuje stronę | TEL |
+| F-60 | Klikalny obszar POI obejmuje tylko kółko/znacznik, nie ogon; POI bez nazwy i kilometra nie otwiera pustego dymka | TEL |
 
 ## 2. Wymagania niefunkcjonalne i ograniczenia
 

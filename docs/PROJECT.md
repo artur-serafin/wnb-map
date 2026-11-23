@@ -7,12 +7,17 @@ i bieżącą pozycję organizatora. Organizator udostępnia pozycję z iPhone'a,
 także w tle.
 
 ## Stan na dziś
-- Faza: 1 zakończona (wymagania wstępne), następna: 2 (spiki techniczne)
-- Zrobione: konto GitHub, repozytorium, dokumenty startowe
-- Następny krok: spike'i techniczne (tracking iPhone, mapa, hosting)
+- Status: działające MVP z trasą, POI i śledzeniem pozycji WnB
+- Hosting: OVH Personal, domena docelowa `https://arturserafin.com/wnb/`
+- Zrobione: ingest pozycji, mapa GPX, POI, ETA, języki PL/EN, upload danych,
+  tryb edycji POI i atomowy zapis przez osobny endpoint
+- Następny krok: końcowe testy przeglądarkowe i terenowe, aktualizacja środowiska
+  produkcyjnego i procedury sekretów
 
 ## Wymagania (MVP)
-- Jedna aktualna trasa GPX, wgrywana tylko przez organizatora.
+- Jedna aktualna trasa GPX lub przejazd bez trasy; oba stany obsługuje mapa.
+- Punkty POI mogą istnieć bez trasy i bez kilometra trasy.
+- Tryb edycji POI aktywowany sekretem w parametrze `?s=SEKRET`.
 - Tytuł trasy widoczny na stronie (z nazwy w GPX, a w razie braku z nazwy
   pliku); do rozważenia: data wgrania trasy.
 - Mapa (nie grafika): zoom, przesuwanie, trasa, pozycja uczestnika,
@@ -29,17 +34,20 @@ także w tle.
 - Organizator: natywna aplikacja do śledzenia w tle na iPhonie.
 
 ## Założenia i ryzyka
-- Śledzenie w tle na iPhonie nie działa ze strony WWW – potrzebna
-  aplikacja natywna (kandydaci: Traccar Client, OwnTracks).
-- Ruch od 130–200 osób może przekraczać limity darmowych planów.
-- Hosting: do sprawdzenia, w tym istniejący hosting OVH (plan Personal).
-- Domena: na razie dowolna, własna do ewentualnego zakupu później.
+- Śledzenie w tle działa przez aplikację Traccar Client; strona jest tylko widokiem.
+- Ruch od 130–200 osób musi być monitorowany pod kątem limitów hostingu i kafelków.
+- Hosting OVH Personal został zatwierdzony na podstawie testów obciążeniowych.
+- Kafelki OpenStreetMap nie mają gwarancji dostępności i mogą zostać zmienione.
+- Sekrety ingest, upload i trybu edycji są utrzymywane poza publicznym repozytorium.
 
 ## Pytania otwarte
-- Po ilu minutach bez danych uznać, że organizator nie udostępnia pozycji?
+- Czy progi utraty sygnału potwierdzają się w pełnym przejeździe terenowym?
 - Co eksportuje MapMyRun do GPX (nazwa trasy, gęstość punktów)?
 - Zużycie baterii aplikacji trackingowych przy 3 h jazdy.
 
 ## Odnośniki
 - DECISIONS.md – dziennik decyzji
 - BACKLOG.md – lista zadań i stan prac
+- ARCHITECTURE.md – komponenty i przepływy danych
+- REQUIREMENTS.md – wymagania i kryteria weryfikacji
+- RUNBOOK.md – operacje Organizatora

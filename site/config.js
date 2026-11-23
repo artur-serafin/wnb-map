@@ -10,9 +10,13 @@ const CONFIG = {
 
   // ---------- Pliki ----------
   GPX_URL: 'data/WnB.gpx',          // plik z trasą (ścieżka względem strony)
+  POI_URL: 'data/poi.json',         // plik z punktami POI
+  UPDATE_URL_TEMPLATE: 'update-{secret}.php', // szablon; {secret} zastępuje wartość ?s=SEKRET
   NO_ROUTE_TITLE: 'Wtorek na Bulwarach', // tytuł trasy, gdy nie ma pliku GPX (np. w trakcie tworzenia trasy)
   LIVE_URL: 'live/latest.json',     // plik z pozycją WnB, tworzony przez skrypt ingest
   LANG_DIR: 'lang/',                // folder z plikami językowymi
+  SPLASH_HOLD_MS: 1500,              // ile ms ekran startowy pozostaje na pełnym ekranie
+  SPLASH_FADE_MS: 1000,             // czas zanikania ekranu startowego
   // UWAGA: długość ogona (ile sekund historii) ustawiasz po stronie serwera,
   // w skrypcie ingest-....php (stała TAIL_SECONDS), nie tutaj.
 
@@ -23,7 +27,7 @@ const CONFIG = {
 									
   // ----------- POI --------------
   POI_ICON_SIZE_PX: 34,				// rozmiar ikony POI
-  POI_TAIL_PX: 22,                  // długość ogona znacznika POI (px): odległość kółka od wskazywanego punktu
+  POI_TAIL_PX: 35,                  // długość ogona znacznika POI (px): odległość kółka od wskazywanego punktu
   SHOW_ETA: true,                   // etykiety ETA przy punktach i mecie (false = ukryj)
   ROUTE_MAX_OFFSET_METERS: 200,     // dalej niż tyle metrów od trasy WnB uznajemy za "poza trasą" (bez ETA)
   POI_AT_METERS: 100,               // blisko punktu = w odległości do tylu metrów

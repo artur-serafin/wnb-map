@@ -16,6 +16,7 @@ Wersja robocza z 2026-11-20. Adresy i sekrety uzupełniasz w sekcji 1, **poza re
 |---|---|
 | Strona dla Uczestników | (do uzupełnienia po wyborze domeny) |
 | Wgrywanie trasy (`upload`) | `https://…/upload-<SEKRET>.php` |
+| Edycja POI (`update`) | `https://…/update-<SEKRET>.php` |
 | Odbiór pozycji (`ingest`), wpisywany w Traccar Client | `https://…/ingest-<SEKRET>.php` |
 
 Sekrety przechowuj w menedżerze haseł. To jedyne zabezpieczenie: kto zna adres `ingest`, może podszywać się pod WnB, a kto zna adres `upload`, może podmienić trasę.
@@ -31,6 +32,7 @@ Sekrety przechowuj w menedżerze haseł. To jedyne zabezpieczenie: kto zna adres
 ├── live/latest.json               bieżąca pozycja WnB (zapisuje ingest)
 ├── ingest-<SEKRET>.php            odbiór pozycji z Traccar Client
 ├── upload-<SEKRET>.php            wgrywanie i usuwanie trasy
+├── update-<SEKRET>.php            weryfikacja i zapis POI w trybie edycji
 └── .htaccess                      zabezpieczenia (brak listingu katalogów, blokada .lock/.tmp/.log/.prev)
 ```
 
@@ -67,10 +69,11 @@ Sekrety przechowuj w menedżerze haseł. To jedyne zabezpieczenie: kto zna adres
 2. Strona sprawdzi sekret na serwerze i przejdzie w tryb edycji.
 3. Długi dotyk pustej części mapy dodaje punkt `default` z ostatnią kolejnością.
 4. Długi dotyk istniejącego znacznika otwiera edycję; press+move przesuwa punkt na mapie.
-5. W pop-overze zmień nazwę, typ, kolejność i kilometr albo usuń punkt.
-6. Zmiany są lokalne do momentu naciśnięcia save. Krzyżyk zamyka tryb i odrzuca zmiany bez pytania.
-7. Save ponownie weryfikuje sekret i atomowo zastępuje `poi.json`.
-8. W przypadku błędu sekretu lub zapisu nic nie ginie z ekranu edycji.
+5. W pop-overze zmień nazwę, typ, kolejność i kilometr albo usuń punkt. Przycisk × na panelu zamyka tylko panel, bez zapisania i bez zamykania trybu.
+6. Zmiany są lokalne do momentu naciśnięcia save w nagłówku. Save wyświetla krótkie osobne powiadomienie o powodzeniu.
+7. Przycisk × w nagłówku zamyka cały tryb edycji, usuwa `s` z URL i przeładowuje stronę.
+8. Save ponownie weryfikuje sekret i atomowo zastępuje `poi.json`.
+9. W przypadku błędu sekretu lub zapisu nic nie ginie z ekranu edycji.
 
 ### 3.3 Telefon z Traccar Client (iPhone)
 - [ ] Naładowany telefon. Z testów: śledzenie zużywa ok. 7 punktów procentowych baterii na godzinę, plus Twoje filmowanie i rozmowy. Na 3 godziny zaplanuj zapas.
@@ -116,7 +119,7 @@ Sekrety przechowuj w menedżerze haseł. To jedyne zabezpieczenie: kto zna adres
 
 ## 7. Przejazd bez trasy
 
-Usuń trasę przez stronę `upload` (albo nie wgrywaj żadnej). Strona pokaże wtedy tylko mapę i pozycję WnB, bez punktów, ETA i przycisku „Cała trasa", i nie zgłosi żadnego błędu.
+Usuń trasę przez stronę `upload` (albo nie wgrywaj żadnej). Strona nadal może pokazywać POI, ale bez trasy, kilometra trasy, ETA i przycisku „Cała trasa".
 
 ## 8. Wgrywanie trasy: najczęstsze błędy
 
@@ -140,7 +143,7 @@ Przez FTP w folderze `data`: zmień nazwę `WnB.gpx.prev` na `WnB.gpx` (nadpisz 
 Podejrzenie: ktoś zmienił trasę bez Twojej wiedzy albo pojawia się obca pozycja WnB.
 
 1. Wygeneruj nowy sekret (PowerShell: `[guid]::NewGuid().ToString('N')`).
-2. Zmień nazwę pliku na serwerze (FTP): `ingest-<STARY>.php` na `ingest-<NOWY>.php` (i/lub `upload-…`).
+2. Zmień nazwę pliku na serwerze (FTP): `ingest-<STARY>.php` na `ingest-<NOWY>.php`, `upload-<STARY>.php` na `upload-<NOWY>.php` i/lub `update-<STARY>.php` na `update-<NOWY>.php`.
 3. **Ingest:** wpisz nowy adres w Traccar Client (Server URL).
 4. Sprawdź, że wszystko działa (Send location albo wejście na stronę `upload`). Zapisz nowy sekret w menedżerze haseł.
 5. Sprawdź, czy trasa i punkty są prawidłowe. W razie podmiany: sekcja 9.
@@ -161,6 +164,8 @@ Wszystkie ustawienia mają komentarze w pliku. Najczęściej zmieniane:
 | `SHOW_GLOW`, `GLOW_SHOW_DISTANCE` | true, false | poświata w stronę WnB i napis z odległością |
 | `SHOW_COMPASS`, `COMPASS_DECLINATION_DEG` | true, 7 | kompas Uczestnika, poprawka na północ geograficzną |
 | `TILE_URL` | OSM | źródło map (zmiana, gdy OSM zablokuje dostęp) |
+| `SPLASH_HOLD_MS` | 500 | ile ms logo pozostaje na pełnym ekranie przed zanikiem |
+| `SPLASH_FADE_MS` | 1000 | czas animacji zanikania ekranu startowego |
 
 Po zmianie wgraj `config.js` na serwer i zamknij oraz ponownie otwórz kartę (przeglądarka mogła zapamiętać stary plik).
 

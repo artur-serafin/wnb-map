@@ -58,7 +58,7 @@ Zewnętrzne zależności: kafelki OpenStreetMap (bez gwarancji dostępności, wy
  "tail":[[52.208602,21.01436,1794776594], …]}
 ```
 
-**Strona.** Po otwarciu: język, trasa (`data/WnB.gpx`, pierwszy `trk`, kolejne identyczne punkty pomijane), punkty POI (tylko gdy jest trasa), start lokalizacji Uczestnika. Potem co 8 s pobranie `latest.json` (`?t=…`, `cache: no-store`); wiek pozycji liczony względem czasu serwera z nagłówka `Date`, a nie zegara telefonu. Pojedynczy błąd pobrania jest ignorowany, komunikat o braku połączenia po 2 z rzędu.
+**Strona.** Po otwarciu: język, trasa (`data/WnB.gpx`, pierwszy `trk`, kolejne identyczne punkty pomijane) i punkty POI niezależnie od obecności trasy. Startuje lokalizacja Uczestnika. Potem co 8 s pobranie `latest.json` (`?t=…`, `cache: no-store`); wiek pozycji liczony względem czasu serwera z nagłówka `Date`, a nie zegara telefonu. Pojedynczy błąd pobrania jest ignorowany, komunikat o braku połączenia po 2 z rzędu.
 
 **Trasa i POI.** `upload` waliduje plik przed zapisem (poprawny XML, `trk` z ≥ 2 różnymi punktami, współrzędne, ≤ 5000 punktów, ≤ 2 MB, brak DOCTYPE/ENTITY; POI: lista, znany typ, pozycja, opcjonalny `km`), kopiuje poprzednią wersję do `.prev` i podmienia plik atomowo. Zapisanie samego POI zastępuje tylko `poi.json` i zostawia GPX. Zapisanie GPX zastępuje trasę i usuwa dotychczasowe POI, ponieważ stare punkty mogą nie odpowiadać nowej mapie. Usunięcie usuwa oba pliki. Brak pliku trasy (404) jest stanem celowym: mapa nadal może pokazywać POI, bez kilometra trasy i ETA.
 
@@ -138,6 +138,7 @@ Wdrożenie ręczne przez FTP (prawdziwe skrypty z sekretem w nazwie istnieją ty
 - `order` jest opcjonalny. Zapis edytora normalizuje punkty do kolejności `1...N`.
 - `km` jest opcjonalny i może być liczbą albo tekstem z przecinkiem. Puste pole oznacza „bez kilometra".
 - Dla punktu bez `order` znacznik nie pokazuje cyfry. Dla punktu bez `km` dymek nie pokazuje kilometra.
+Jeżeli POI nie ma nazwy i kilometra, kliknięcie nie otwiera pustego dymka.
 
 ### 9.2 Stan strony
 
@@ -148,7 +149,9 @@ Strona ma dwa stany: normalny widok i tryb edycji. Tryb edycji nie zmienia danyc
 2. lista może być lokalnie dodawana, usuwana, przenumerowana i przesuwana,
 3. zamknięcie trybu odrzuca lokalną kopię,
 4. przycisk save wysyła całą listę do endpointu,
-5. dopiero poprawna odpowiedź serwera zastępuje stan Ekranu i kończy sesję niesaved changes.
+5. dopiero poprawna odpowiedź serwera zastępuje stan ekranu i kończy sesję zmienionych danych,
+6. udany save pokazuje osobne powiadomienie przez 2 sekundy bez usuwania pozostałych powiadomień,
+7. zamknięcie trybu usuwa `s` z URL i przeładowuje stronę, aby pobrać zapisane POI.
 
 Nie są wykonywane częściowe zapisy ani natychmiastowe zapisy po każdym przesunięciu.
 
@@ -157,6 +160,8 @@ Nie są wykonywane częściowe zapisy ani natychmiastowe zapisy po każdym przes
 URL ma postać `https://arturserafin.com/wnb/?s=SEKRET` w przypadku docelowej lokalizacji. Sekret:
 
 - jest sprawdzany żądaniem `POST` do `update-<SEKRET>.php` z akcją `verify`,
+- nazwa endpointu pochodzi z publicznego szablonu `update-{secret}.php` w `config.js`,
+- skrypt na serwerze pobiera oczekiwany sekret z własnej nazwy i porównuje go z polem `secret`,
 - jest ponownie wymagany w żądaniu `save`,
 - jest porównywany stałym czasem i nigdy nie trafia do `poi.json`, `config.js` ani repozytorium,
 - nie daje prawa wysyłania niepoprawnej lub zbyt dużej listy POI.
@@ -198,6 +203,12 @@ Drag:
 - po puszczeniu współrzędne są dopisywane tylko do lokalnej kopii.
 
 Normalny widok zachowuje dotychczasową klikalność znacznika (dymek) i pomija klikalność strzałki.
+Pole kliknięcia jest ograniczone do kółka/ikony znacznika, bez ogona. W trybie edycji ogon
+POI ma dwa razy większą długość niż `POI_TAIL_PX`.
+W trybie edycji ogon POI ma dwa razy większą długość niż w konfiguracji. Pole kliknięcia
+znacznika jest ograniczone do kółka/ikony i nie obejmuje ogona ani strzałki. W liście edytora
+dostępne są osobny przycisk zamknięcia panelu punktu, przyciski save i zamknięcia trybu w
+nagłówku strony oraz osobne powiadomienie o udanym save.
 
 ### 9.5 Kolejność i ETA
 

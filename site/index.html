@@ -25,6 +25,9 @@ if (window.location.protocol === 'http:') {
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
 <style>
   html, body { height: 100%; margin: 0; }
+  #splash { position: fixed; inset: 0; z-index: 2000; display: grid; place-items: center; background: #14213d; opacity: 1; pointer-events: auto; transition-property: opacity; transition-timing-function: linear; }
+  #splash img { width: min(72vw, 72vh); height: min(72vw, 72vh); object-fit: contain; }
+  #splash.splashDone { opacity: 0; pointer-events: none; }
   body { display: flex; flex-direction: column; font: 16px/1.4 system-ui, sans-serif; }
   header, .fabs, #menuLayer, .leaflet-control { touch-action: manipulation; }
   header { display: flex; align-items: center; gap: .5rem; padding: .5rem .9rem; padding-top: calc(.5rem + env(safe-area-inset-top, 0px)); background: #14213d; color: #fff; }
@@ -32,6 +35,11 @@ if (window.location.protocol === 'http:') {
   header h1 { flex: 1; min-width: 0; font-size: 1rem; margin: 0; font-weight: 600; }
   .burger { flex: none; width: 40px; height: 40px; margin: -.35rem -.5rem -.35rem 0; padding: 0; display: grid; place-items: center; border: 0; background: transparent; color: #fff; }
   .burger svg, .fab svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .headerActions { display: flex; align-items: center; gap: 2px; }
+  body.editMode #btnMenu { display: none; }
+  .headerAction { flex: none; width: 40px; height: 40px; margin: -.35rem -.35rem -.35rem 0; padding: 0; display: grid; place-items: center; border: 0; background: transparent; color: #fff; }
+  .headerAction svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .headerAction[hidden] { display: none; }
   .stage { flex: 1; min-height: 0; position: relative; }
   #map { position: absolute; inset: 0; }
   #notes { position: absolute; top: 10px; left: 0; right: 0; z-index: 1000; display: flex; flex-direction: column; align-items: center; gap: 6px; pointer-events: none; }
@@ -70,18 +78,37 @@ if (window.location.protocol === 'http:') {
   .leaflet-tooltip.etatip { background: #14213d; color: #fff; border: 0; border-radius: 10px; padding: 3px 8px; font-weight: 700; font-variant-numeric: tabular-nums; box-shadow: 0 1px 5px rgba(0,0,0,.35); }
   .leaflet-tooltip.etatip::before { display: none; }
   .kmpop .sub { font-weight: 500; font-size: .8rem; opacity: .7; }
+  body.editMode #menuLayer { display: none; }
+  body.editMode .leaflet-control-attribution { display: none; }
+  #poiEditor { position: absolute; left: 50%; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 1250; width: min(calc(100% - 24px), 360px); box-sizing: border-box; border-radius: 14px; background: #fff; color: #14213d; box-shadow: 0 4px 18px rgba(0,0,0,.4); padding: .8rem; }
+  #poiEditor[hidden] { display: none; }
+  .poiEditorHeader { display: flex; align-items: center; gap: .5rem; }
+  #poiEditor h2 { flex: 1; margin: 0 0 .6rem; font-size: 1rem; }
+  #poiEditorClose { flex: none; width: 36px; height: 36px; margin: -.35rem -.35rem .25rem 0; border: 0; border-radius: 8px; background: transparent; color: #14213d; font-size: 1.35rem; line-height: 1; }
+  #poiEditor label { display: block; font-size: .82rem; font-weight: 700; margin-top: .45rem; }
+  #poiEditor input, #poiEditor select { width: 100%; box-sizing: border-box; border: 1px solid #ccd; border-radius: 8px; padding: .55rem; font: inherit; background: #fff; }
+  #poiEditor .row { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+  #poiEditor .delete { width: 100%; margin-top: .6rem; border: 0; border-radius: 8px; padding: .55rem; background: #c0392b; color: #fff; font: inherit; font-weight: 700; }
+  #editStatus { min-height: 1.2em; margin-top: .4rem; color: #c0392b; font-size: .82rem; }
+  body.editMode .poi .badge { cursor: move; }
+  body.editMode .leaflet-marker-icon.poi.leaflet-interactive { pointer-events: none; }
 </style>
 </head>
 <body>
+<div id="splash" aria-hidden="true"><img src="WnB_logo.svg" alt=""></div>
 <header>
   <img class="brandLogo" src="WnB_logo.svg" alt="" aria-hidden="true">
   <h1 id="title">…</h1>
-  <button class="burger" id="btnMenu" aria-haspopup="dialog" aria-expanded="false" aria-controls="menu"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  <div class="headerActions">
+    <button class="burger" id="btnMenu" aria-haspopup="dialog" aria-expanded="false" aria-controls="menu"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    <button class="headerAction" id="btnSaveEdit" hidden aria-label="Save POI changes"><svg viewBox="0 0 24 24"><path d="M5 4h12l3 3v13H4V4z"/><path d="M8 4v6h8V4M8 20v-6h8v6"/></svg></button>
+    <button class="headerAction" id="btnCloseEdit" hidden aria-label="Close edit mode"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
 </header>
 <div class="stage">
   <div id="map"></div>
   <div id="glowLayer"><div id="glow"></div><div id="glowDist"></div></div>
-  <div id="notes"><div class="pill" id="statusBox" hidden></div><div class="pill" id="geoBox" hidden></div></div>
+  <div id="notes"><div class="pill" id="statusBox" hidden></div><div class="pill" id="geoBox" hidden></div><div class="pill" id="saveBox" hidden></div></div>
   <div class="fabs">
     <button class="fab" id="btnIn"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
     <button class="fab" id="btnOut"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
@@ -96,6 +123,17 @@ if (window.location.protocol === 'http:') {
       <h2 id="hLang"></h2><div class="seg" id="langSeg"></div>
       <h2 id="hPrivacy"></h2><div id="privacy"></div>
     </div>
+  </div>
+  <div id="poiEditor" role="dialog" hidden>
+    <div class="poiEditorHeader"><h2 id="poiEditorTitle"></h2><button id="poiEditorClose" aria-label="Close POI settings">×</button></div>
+    <label id="poiNameLabel" for="poiName"></label><input id="poiName" type="text" maxlength="120">
+    <div class="row">
+      <div><label id="poiTypeLabel" for="poiType"></label><select id="poiType"><option value="default">Default</option><option value="zabka">Zabka</option><option value="lody">Lody</option></select></div>
+      <div><label id="poiOrderLabel" for="poiOrder"></label><select id="poiOrder"></select></div>
+    </div>
+    <label id="poiKmLabel" for="poiKm"></label><input id="poiKm" type="text" inputmode="decimal" placeholder="12,524">
+    <button class="delete" id="poiDelete"></button>
+    <div id="editStatus" aria-live="polite"></div>
   </div>
 </div>
 
@@ -131,7 +169,8 @@ async function setLang(code, save) {
 function applyTexts() {
   document.documentElement.lang = lang;
   [['btnIn', T.BTN_ZOOM_IN], ['btnOut', T.BTN_ZOOM_OUT], ['btnFit', T.BTN_FIT],
-   ['btnOrg', fill(T.BTN_ORG)], ['btnMe', T.BTN_ME], ['btnMenu', T.BTN_MENU]]
+   ['btnOrg', fill(T.BTN_ORG)], ['btnMe', T.BTN_ME], ['btnMenu', T.BTN_MENU],
+   ['btnSaveEdit', T.BTN_SAVE], ['btnCloseEdit', T.BTN_CLOSE_EDIT]]
     .forEach(([id, t]) => { $(id).setAttribute('aria-label', t || ''); $(id).title = t || ''; });
   $('menu').setAttribute('aria-label', T.BTN_MENU || '');
   $('hLang').textContent = T.MENU_LANGUAGE || '';
@@ -145,6 +184,14 @@ function applyTexts() {
   });
   const priv = $('privacy'); priv.textContent = '';
   (T.PRIVACY || []).forEach(t => { const p = document.createElement('p'); p.textContent = fill(t); priv.appendChild(p); });
+  $('poiEditorTitle').textContent = T.EDIT_TITLE || '';
+  $('poiNameLabel').textContent = T.EDIT_NAME || '';
+  $('poiTypeLabel').textContent = T.EDIT_TYPE || '';
+  $('poiOrderLabel').textContent = T.EDIT_ORDER || '';
+  $('poiKmLabel').textContent = T.EDIT_KM || '';
+  $('poiDelete').textContent = T.EDIT_DELETE || '';
+  const typeLabels = { default: T.TYPE_DEFAULT, zabka: T.TYPE_ZABKA, lody: T.TYPE_LODY };
+  for (const option of $('poiType').options) option.textContent = typeLabels[option.value] || option.value;
   if (routeFailed) $('title').textContent = T.ROUTE_ERROR;
   refreshSfLabels(); renderGeo(); renderLive(); renderEta();
 }
@@ -240,17 +287,18 @@ function fmtAgo(s) {
 }
 
 // ---------- trasa ----------
-function noRoute() {   // przejazd bez trasy: pokazujemy tylko mapę i pozycję WnB
+async function noRoute() {   // przejazd bez trasy: pokazujemy mapę i POI, bez ETA i kilometra trasy
   routeFailed = false;
   const t = C.NO_ROUTE_TITLE || '';
   $('title').textContent = t;
   if (t) document.title = t;
   $('btnFit').hidden = true;   // przycisk "Cała trasa" nie ma wtedy sensu
+  await loadPoi();
 }
 async function loadRoute() {
   try {
     const res = await fetch(C.GPX_URL, { cache: 'no-cache' });
-    if (res.status === 404) { noRoute(); return; }   // brak trasy to stan celowy: bez komunikatu, bez POI i ETA
+    if (res.status === 404) { await noRoute(); return; }   // brak trasy to stan celowy: POI mogą działać, bez ETA
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const xml = new DOMParser().parseFromString(await res.text(), 'application/xml');
     const trk = xml.getElementsByTagName('trk')[0];
@@ -271,7 +319,7 @@ async function loadRoute() {
     addStartFinish(pts);
     routeBounds = line.getBounds();
     map.fitBounds(routeBounds, { padding: [C.FIT_PADDING, C.FIT_PADDING] });
-    prepRoute(); drawArrows(); updateFar(); loadPoi(); updateProgress(); renderEta();
+    prepRoute(); drawArrows(); updateFar(); await loadPoi(); updateProgress(); renderEta();
     $('title').textContent = name + ' - ' + total.toFixed(1).replace('.', ',') + ' km';
     document.title = name;
   } catch (e) {
@@ -385,26 +433,39 @@ const POI_TYPES = {
          '<path d="M11.8 20.8Q17 25.6 22.2 20.8" fill="none" stroke="#1e9b4d" stroke-width="1.7" stroke-linecap="round"/>',
   lody:  '<circle cx="17" cy="17" r="16" fill="#ff7aa8" stroke="#fff" stroke-width="2"/>' +
          '<path d="M11 16h12l-6 12z" fill="#d98c3f"/>' +
-         '<circle cx="17" cy="12.5" r="6.8" fill="#fff6e0"/><path d="M13.3 11.2a4 4 0 0 1 3-2.4" fill="none" stroke="#ff7aa8" stroke-width="1.5" stroke-linecap="round"/>'
+         '<circle cx="17" cy="12.5" r="6.8" fill="#fff6e0"/><path d="M13.3 11.2a4 4 0 0 1 3-2.4" fill="none" stroke="#ff7aa8" stroke-width="1.5" stroke-linecap="round"/>',
+  default: '<circle cx="17" cy="17" r="16" fill="#14213d" stroke="#fff" stroke-width="2"/>'
 };
 function parsePos(e) {   // "52.2184, 21.0151" (wklejone z Google Maps) albo pola lat/lon
   if (typeof e.pos === 'string') {
     const m = e.pos.match(/^\s*(-?\d+(?:\.\d+)?)\s*[,;\s]\s*(-?\d+(?:\.\d+)?)\s*$/);
-    return m ? [parseFloat(m[1]), parseFloat(m[2])] : null;
+    if (!m) return null;
+    const lat = parseFloat(m[1]), lon = parseFloat(m[2]);
+    return Math.abs(lat) <= 90 && Math.abs(lon) <= 180 ? [lat, lon] : null;
   }
   const lat = parseFloat(e.lat), lon = parseFloat(e.lon);
-  return isFinite(lat) && isFinite(lon) ? [lat, lon] : null;
+  return isFinite(lat) && isFinite(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180 ? [lat, lon] : null;
 }
 function parseKm(v) {    // liczba 12.524 albo tekst "12,524"
   if (v == null || v === '') return null;
-  const n = typeof v === 'number' ? v : parseFloat(String(v).replace(',', '.'));
-  return isFinite(n) ? n : null;
+  if (typeof v === 'number') return isFinite(v) && v >= 0 ? v : null;
+  const s = String(v).trim();
+  if (!/^-?\d+(?:[.,]\d+)?$/.test(s)) return null;
+  const n = parseFloat(s.replace(',', '.'));
+  return isFinite(n) && n >= 0 ? n : null;
+}
+function normalizePoiType(v) { return ['zabka', 'lody', 'default'].includes(v) ? v : 'default'; }
+function parseOrder(v) {
+  if (typeof v !== 'number' && typeof v !== 'string') return null;
+  if (!/^\d+$/.test(String(v))) return null;
+  const n = typeof v === 'number' ? v : parseInt(String(v), 10);
+  return Number.isInteger(n) && n > 0 ? n : null;
 }
 // Znacznik POI: kółko z ikoną leży obok trasy, a ogon wskazuje dokładną pozycję punktu.
 // Kierunek ogona jest wybierany tak, żeby kółko leżało jak najdalej od trasy (liczone przy każdym przybliżeniu).
 const POI_R = POI_SIZE / 2, POI_TAIL = C.POI_TAIL_PX || 22, POI_D = POI_R + POI_TAIL;
 const POI_S = Math.ceil(2 * (POI_D + POI_R)) + 4;
-const POI_COLOR = { zabka: '#1e9b4d', lody: '#ff7aa8' };
+const POI_COLOR = { zabka: '#1e9b4d', lody: '#ff7aa8', default: '#14213d' };
 
 function distToRoute(c, px) {
   let best = Infinity;
@@ -426,33 +487,49 @@ function poiAngle(tip, px) {   // kąt (stopnie od góry, zgodnie z ruchem wskaz
   }
   return best.deg;
 }
-function poiIcon(type, deg) {
-  const th = deg * Math.PI / 180, ux = Math.sin(th), uy = -Math.cos(th), h = POI_S / 2, col = POI_COLOR[type];
-  const bx = h + POI_D * ux, by = h + POI_D * uy, vx = -uy, vy = ux, f = 38 * Math.PI / 180;
+function poiIcon(type, deg, order) {
+  type = normalizePoiType(type);
+  const tail = editMode ? POI_TAIL * 2 : POI_TAIL;
+  const distance = POI_R + tail;
+  const size = Math.ceil(2 * (distance + POI_R)) + 4;
+  const th = deg * Math.PI / 180, ux = Math.sin(th), uy = -Math.cos(th), h = size / 2, col = POI_COLOR[type];
+  const bx = h + distance * ux, by = h + distance * uy, vx = -uy, vy = ux, f = 38 * Math.PI / 180;
   const base = s => (bx + POI_R * (-ux * Math.cos(f) + s * vx * Math.sin(f))).toFixed(1) + ',' + (by + POI_R * (-uy * Math.cos(f) + s * vy * Math.sin(f))).toFixed(1);
+  let badge = POI_TYPES[type] || POI_TYPES.default;
+  if (type === 'default' && order != null) {
+    badge += '<text x="17" y="17" dominant-baseline="middle" text-anchor="middle" fill="#fff" font-family="system-ui,sans-serif" font-size="13" font-weight="800">' +
+      String(order).replace(/[&<>'"]/g, '') + '</text>';
+  }
   return L.divIcon({
-    className: 'poi', iconSize: [POI_S, POI_S], iconAnchor: [h, h],
-    popupAnchor: [POI_D * ux, POI_D * uy - POI_R],
-    html: '<svg viewBox="0 0 ' + POI_S + ' ' + POI_S + '" width="' + POI_S + '" height="' + POI_S + '">' +
+    className: 'poi', iconSize: [size, size], iconAnchor: [h, h],
+    popupAnchor: [distance * ux, distance * uy - POI_R],
+    html: '<svg viewBox="0 0 ' + size + ' ' + size + '" width="' + size + '" height="' + size + '">' +
           '<polygon points="' + h + ',' + h + ' ' + base(1) + ' ' + base(-1) + '" fill="' + col + '" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>' +
-          '<svg class="badge" x="' + (bx - POI_R).toFixed(1) + '" y="' + (by - POI_R).toFixed(1) + '" width="' + POI_SIZE + '" height="' + POI_SIZE + '" viewBox="0 0 34 34">' + POI_TYPES[type] + '</svg></svg>'
+          '<svg class="badge" x="' + (bx - POI_R).toFixed(1) + '" y="' + (by - POI_R).toFixed(1) + '" width="' + POI_SIZE + '" height="' + POI_SIZE + '" viewBox="0 0 34 34">' + badge + '</svg></svg>'
   });
 }
 const poiList = [];
 function addPoi(e) {
-  const svg = POI_TYPES[e && e.type], ll = e && parsePos(e);
-  if (!svg || !ll) { console.warn('poi.json: pominięto wpis', e); return; }
-  const kmv = parseKm(e.km), box = document.createElement('div');
+  const type = normalizePoiType(e && e.type), ll = e && parsePos(e);
+  if (!ll) { console.warn('poi.json: pominięto wpis', e); return; }
+  const kmv = parseKm(e.km), order = parseOrder(e.order), box = document.createElement('div');
   const name = document.createElement('div'); name.textContent = e.name || ''; box.appendChild(name);
   if (kmv != null) { const k = document.createElement('div'); k.className = 'sub'; k.textContent = fmtKm(kmv); box.appendChild(k); }
-  const marker = L.marker(ll, { icon: poiIcon(e.type, 0), zIndexOffset: 500, keyboard: false })
-    .addTo(map).bindPopup(box, { closeButton: false, autoPan: false, className: 'kmpop' });
-  poiList.push({ type: e.type, name: e.name, ll, km: kmv, marker });
+  const hasPopup = Boolean((e.name || '').trim() || kmv != null);
+  const marker = L.marker(ll, { icon: poiIcon(type, 0, order), zIndexOffset: 500, keyboard: false, draggable: editMode })
+    .addTo(map);
+  if (hasPopup) marker.bindPopup(box, { closeButton: false, autoPan: false, className: 'kmpop' });
+  poiList.push({ type, name: e.name || '', ll, km: kmv, order, marker, raw: e });
 }
 function placePois() {
-  if (!poiList.length || routePts.length < 2) return;
+  if (!poiList.length) return;
+  if (routePts.length < 2) {
+    poiList.forEach(p => { p.deg = 0; p.marker.setIcon(poiIcon(p.type, 0, p.order)); });
+    renderEta();
+    return;
+  }
   const z = map.getZoom(), px = routePts.map(ll => map.project(ll, z));
-  poiList.forEach(p => { p.deg = poiAngle(map.project(p.ll, z), px); p.marker.setIcon(poiIcon(p.type, p.deg)); });
+  poiList.forEach(p => { p.deg = poiAngle(map.project(p.ll, z), px); p.marker.setIcon(poiIcon(p.type, p.deg, p.order)); });
   renderEta();
 }
 map.on('zoomend', placePois);
@@ -461,9 +538,295 @@ async function loadPoi() {   // plik POI jest opcjonalny
     const res = await fetch(C.POI_URL || 'data/poi.json', { cache: 'no-cache' });
     if (!res.ok) return;
     const list = await res.json();
-    if (Array.isArray(list)) { list.forEach(addPoi); placePois(); }
+    if (Array.isArray(list)) {
+      poiList.forEach(p => map.removeLayer(p.marker));
+      poiList.length = 0;
+      list.forEach(addPoi);
+      placePois();
+    }
   } catch (e) { console.warn('poi.json', e); }
 }
+
+  // ---------- tryb edycji POI ----------
+  let editMode = false, editSecret = null, editPois = [], editingPoiId = null, editVerifyTimer = null;
+  let editSaveNoticeTimer = null;
+  function showEditSaveSuccess() {
+    if (editSaveNoticeTimer) clearTimeout(editSaveNoticeTimer);
+    setPill($('saveBox'), T.EDIT_SAVE_SUCCESS || 'POI changes saved');
+    editSaveNoticeTimer = setTimeout(() => {
+      editSaveNoticeTimer = null;
+      setPill($('saveBox'), null);
+    }, 2000);
+  }
+  function editUpdateUrl(secret) {
+    const template = C.UPDATE_URL_TEMPLATE || 'update-{secret}.php';
+    const safe = /^[A-Za-z0-9_-]{1,128}$/.test(secret);
+    if (!safe) return null;
+    return template.replace('{secret}', encodeURIComponent(secret));
+  }
+
+  function editLatLon(p) {
+    if (Number.isFinite(p.lat) && Number.isFinite(p.lon)) return [Number(p.lat), Number(p.lon)];
+    if (p.ll) return [p.ll[0], p.ll[1]];
+    const ll = parsePos(p);
+    return ll;
+  }
+  function normalizeEditOrders(list) {
+    list.forEach((p, i) => { p.order = i + 1; });
+  }
+  function poiSavePayload() {
+    return editPois.map(p => {
+      const out = {
+        type: normalizePoiType(p.type),
+        name: p.name || '',
+        lat: p.lat,
+        lon: p.lon,
+        order: p.order
+      };
+      if (p.km !== null && p.km !== '' && Number.isFinite(Number(String(p.km).replace(',', '.')))) {
+        out.km = Number(String(p.km).replace(',', '.'));
+      }
+      return out;
+    });
+  }
+  function syncEditMarkers() {
+    poiList.forEach(p => map.removeLayer(p.marker));
+    poiList.length = 0;
+    normalizeEditOrders(editPois);
+    editPois.forEach((p, i) => {
+      p.order = i + 1;
+      const e = { type: p.type, name: p.name, lat: p.lat, lon: p.lon, km: p.km, order: p.order, _editId: p.id };
+      addPoi(e);
+    });
+    placePois();
+    enableEditableMarkers();
+  }
+  function enableEditableMarkers() {
+    poiList.forEach(p => {
+      const id = p.raw && p.raw._editId;
+      p.marker._editId = id;
+      p.marker.dragging ? p.marker.dragging.enable() : null;
+    });
+    poiList.forEach(p => {
+      const marker = p.marker;
+      marker.off('dragstart');
+      marker.off('drag');
+      marker.off('dragend');
+      marker.on('dragstart', () => {
+        if (editVerifyTimer) { clearTimeout(editVerifyTimer); editVerifyTimer = null; }
+      });
+      marker.on('drag', () => {
+        const pt = map.latLngToContainerPoint(marker.getLatLng());
+        const size = map.getSize();
+        const edge = 36, step = 8;
+        const dx = pt.x < edge ? -step : (pt.x > size.x - edge ? step : 0);
+        const dy = pt.y < edge ? -step : (pt.y > size.y - edge ? step : 0);
+        if (dx || dy) map.panBy([dx, dy], { animate: false });
+      });
+      marker.on('dragend', () => {
+        const ll = marker.getLatLng();
+        const item = editPois.find(x => x.id === marker._editId);
+        if (item) {
+          item.lat = ll.lat;
+          item.lon = ll.lng;
+          const popup = marker.getPopup();
+          if (popup) popup.setContent(poiPopupContent(item));
+        }
+      });
+      const el = marker.getElement();
+      if (!el) return;
+      let longTimer = null, start = null;
+      el.addEventListener('pointerdown', ev => {
+        ev.stopPropagation();
+        start = { x: ev.clientX, y: ev.clientY };
+        longTimer = setTimeout(() => {
+          longTimer = null;
+          openPoiEditor(marker._editId);
+        }, 650);
+      });
+      el.addEventListener('pointermove', ev => {
+        if (start && Math.hypot(ev.clientX - start.x, ev.clientY - start.y) > 10 && longTimer) {
+          clearTimeout(longTimer); longTimer = null;
+        }
+      });
+      const cancel = () => { if (longTimer) clearTimeout(longTimer); longTimer = null; start = null; };
+      el.addEventListener('pointerup', cancel);
+      el.addEventListener('pointercancel', cancel);
+    });
+  }
+  function poiPopupContent(p) {
+    const box = document.createElement('div');
+    const name = document.createElement('div');
+    name.textContent = p.name || '';
+    box.appendChild(name);
+    if (p.km != null && p.km !== '') {
+      const km = document.createElement('div');
+      km.className = 'sub';
+      km.textContent = fmtKm(parseKm(p.km));
+      box.appendChild(km);
+    }
+    return box;
+  }
+  function updateEditorOptions() {
+    const select = $('poiOrder');
+    select.textContent = '';
+    for (let i = 1; i <= editPois.length; i++) {
+      const option = document.createElement('option');
+      option.value = String(i);
+      option.textContent = String(i);
+      select.appendChild(option);
+    }
+  }
+  function openPoiEditor(id) {
+    const p = editPois.find(x => x.id === id);
+    if (!p) return;
+    editingPoiId = id;
+    updateEditorOptions();
+    $('poiName').value = p.name || '';
+    $('poiType').value = normalizePoiType(p.type);
+    $('poiOrder').value = String(p.order);
+    $('poiKm').value = p.km == null ? '' : String(p.km).replace('.', ',');
+    $('editStatus').textContent = '';
+    $('poiEditor').hidden = false;
+  }
+  function closePoiEditor() { editingPoiId = null; $('poiEditor').hidden = true; }
+  function movePoiOrder(item, target) {
+    const from = editPois.indexOf(item), to = Math.max(0, Math.min(editPois.length - 1, target - 1));
+    if (from < 0 || from === to) return;
+    editPois.splice(from, 1);
+    editPois.splice(to, 0, item);
+    normalizeEditOrders(editPois);
+    syncEditMarkers();
+    openPoiEditor(item.id);
+  }
+  function enterEditMode() {
+    if (editMode) return;
+    editMode = true;
+    editSecret = new URLSearchParams(window.location.search).get('s');
+    editPois = poiList.map((p, i) => ({
+      id: p.marker._editId || ('poi-' + (i + 1)),
+      type: p.type,
+      name: p.name,
+      lat: p.ll[0],
+      lon: p.ll[1],
+      km: p.km,
+      order: p.order || i + 1
+    }));
+    normalizeEditOrders(editPois);
+    document.body.classList.add('editMode');
+    $('btnCloseEdit').hidden = false;
+    $('btnSaveEdit').hidden = false;
+    document.querySelectorAll('.fabs').forEach(el => { el.hidden = true; });
+    syncEditMarkers();
+  }
+  function closeEditMode() {
+    editMode = false;
+    closePoiEditor();
+    document.body.classList.remove('editMode');
+    $('btnCloseEdit').hidden = true;
+    $('btnSaveEdit').hidden = true;
+    document.querySelectorAll('.fabs').forEach(el => { el.hidden = false; });
+    const url = new URL(window.location.href);
+    url.searchParams.delete('s');
+    window.location.replace(url.pathname + url.search + url.hash);
+  }
+  async function verifyEditSecret(secret) {
+    const url = editUpdateUrl(secret);
+    if (!url) return;
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'verify', secret })
+      });
+      if (res.ok) enterEditMode();
+    } catch (e) {}
+  }
+  async function saveEditPois() {
+    $('editStatus').textContent = '';
+    const url = editUpdateUrl(editSecret);
+    if (!url) {
+      $('editStatus').textContent = T.EDIT_VERIFY_ERROR || 'Invalid secret';
+      return;
+    }
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'save', secret: editSecret, pois: poiSavePayload() })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || (T.EDIT_SAVE_ERROR || 'Save failed'));
+      if (Array.isArray(data.pois)) {
+        editPois = data.pois.map((p, i) => ({
+          id: 'poi-' + (i + 1),
+          type: normalizePoiType(p.type),
+          name: p.name || '',
+          lat: p.lat,
+          lon: p.lon,
+          km: p.km == null ? null : p.km,
+          order: i + 1
+        }));
+        syncEditMarkers();
+      }
+      showEditSaveSuccess();
+    } catch (e) {
+      $('editStatus').textContent = e.message || (T.EDIT_SAVE_ERROR || 'Save failed');
+    }
+  }
+
+  $('btnCloseEdit').onclick = closeEditMode;
+  $('btnSaveEdit').onclick = saveEditPois;
+  $('poiEditorClose').onclick = closePoiEditor;
+  $('poiName').oninput = e => {
+    const p = editPois.find(x => x.id === editingPoiId);
+    if (!p) return;
+    p.name = e.target.value;
+    const marker = poiList.find(x => x.raw && x.raw._editId === p.id);
+    if (marker) marker.marker.setPopupContent(poiPopupContent(p));
+  };
+  $('poiType').onchange = e => {
+    const p = editPois.find(x => x.id === editingPoiId);
+    if (!p) return;
+    p.type = normalizePoiType(e.target.value);
+    syncEditMarkers();
+    openPoiEditor(p.id);
+  };
+  $('poiOrder').onchange = e => {
+    const p = editPois.find(x => x.id === editingPoiId);
+    if (p) movePoiOrder(p, Number(e.target.value));
+  };
+  $('poiKm').oninput = e => {
+    const p = editPois.find(x => x.id === editingPoiId);
+    if (!p) return;
+    const text = e.target.value.trim();
+    p.km = text === '' ? null : text;
+  };
+  $('poiDelete').onclick = () => {
+    if (!editingPoiId) return;
+    editPois = editPois.filter(p => p.id !== editingPoiId);
+    normalizeEditOrders(editPois);
+    closePoiEditor();
+    syncEditMarkers();
+  };
+
+  mapEl.addEventListener('pointerdown', e => {
+    if (!editMode || e.target.closest('.poi')) return;
+    const start = { x: e.clientX, y: e.clientY };
+    const timer = setTimeout(() => {
+      if (Math.hypot(e.clientX - start.x, e.clientY - start.y) <= 10) {
+        const ll = map.mouseEventToLatLng(e);
+        const id = 'poi-' + Date.now();
+        editPois.push({ id, type: 'default', name: '', lat: ll.lat, lon: ll.lng, km: null, order: editPois.length + 1 });
+        normalizeEditOrders(editPois);
+        syncEditMarkers();
+      }
+    }, 650);
+    const cancel = () => clearTimeout(timer);
+    mapEl.addEventListener('pointermove', cancel, { once: true });
+    mapEl.addEventListener('pointerup', cancel, { once: true });
+    mapEl.addEventListener('pointercancel', cancel, { once: true });
+  });
 
 // ---------- pozycja WnB ----------
 let org = null, polled = false, failCount = 0, serverOffset = 0, orgMarker = null;
@@ -635,7 +998,8 @@ function setEtaLabel(t, text) {
   } else etaTip.setContent(text);
 }
 function renderEta() {
-  if (C.SHOW_ETA === false || !org || !prog || !lang) { setEtaLabel(null); return; }
+  if (C.SHOW_ETA === false || !org || !prog || !lang || routePts.length < 2 ||
+      (poiList.length && poiList.some(p => p.km == null))) { setEtaLabel(null); return; }
   const age = (Date.now() + serverOffset) / 1000 - org.last.ts;
   const info = etaInfo(prog, org.last, age, getTargets());
   if (!info) { setEtaLabel(null); return; }
@@ -786,9 +1150,24 @@ $('btnFit').onclick = () => { if (routeBounds) map.fitBounds(routeBounds, { padd
 $('btnOrg').onclick = () => { if (orgMarker) focus(orgMarker.getLatLng()); };
 $('btnMe').onclick = () => { startCompass(); if (meMarker) focus(meMarker.getLatLng()); else startLocating(); };
 
+function showSplash() {
+  const splash = $('splash');
+  if (!splash) return;
+  const hold = Math.max(0, Number(C.SPLASH_HOLD_MS) || 0);
+  const fade = Math.max(0, Number(C.SPLASH_FADE_MS) || 0);
+  splash.style.transitionDuration = fade + 'ms';
+  window.setTimeout(() => {
+    splash.classList.add('splashDone');
+    window.setTimeout(() => splash.remove(), fade);
+  }, hold);
+}
+
 (async function start() {
+  showSplash();
   await setLang(pickLang(), false);   // najpierw teksty, potem reszta
-  loadRoute(); pollLive(); startLocating();
+  await loadRoute(); pollLive(); startLocating();
+  const secret = new URLSearchParams(window.location.search).get('s');
+  if (secret) verifyEditSecret(secret);
   if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission !== 'function') startCompass();   // poza iPhonem bez pytania
   setInterval(pollLive, C.POLL_SECONDS * 1000);
   setInterval(() => {

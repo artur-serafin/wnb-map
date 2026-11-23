@@ -11,7 +11,7 @@ const POI_NAME      = 'poi.json';
 const MAX_GPX_BYTES = 2000000;           // maksymalny rozmiar pliku GPX
 const MAX_POI_BYTES = 200000;            // maksymalny rozmiar pliku poi.json
 const MAX_POINTS    = 5000;              // maksymalna liczba punktów trasy
-const POI_TYPES     = ['zabka', 'lody']; // musi zgadzać się z typami ikon na stronie
+const POI_TYPES     = ['zabka', 'lody', 'default']; // musi zgadzać się z typami ikon na stronie
 // ======================
 
 date_default_timezone_set('Europe/Warsaw');
@@ -99,9 +99,8 @@ function parsePoi(string $json, ?float $routeKm): array {
     foreach ($list as $i => $e) {
         $n = $i + 1;
         if (!is_array($e)) { $errors[] = "Wpis $n: nie jest obiektem."; continue; }
-        if (!in_array($e['type'] ?? null, POI_TYPES, true)) {
-            $errors[] = "Wpis $n: nieznany typ (dozwolone: " . implode(', ', POI_TYPES) . ').';
-        }
+        $e['type'] = in_array($e['type'] ?? null, POI_TYPES, true) ? $e['type'] : 'default';
+        $list[$i] = $e;
         if (poiPos($e) === null) $errors[] = "Wpis $n: brak poprawnej pozycji (pole pos albo pola lat i lon).";
         if (isset($e['km']) && $e['km'] !== '') {
             $km = poiKm($e['km']);
@@ -110,8 +109,18 @@ function parsePoi(string $json, ?float $routeKm): array {
                 $warnings[] = "Wpis $n: kilometr " . number_format($km, 3, ',', '') . ' jest większy niż długość trasy (' . number_format($routeKm, 3, ',', '') . ' km).';
             }
         }
+        if (isset($e['order']) && (filter_var($e['order'], FILTER_VALIDATE_INT) === false || (int) $e['order'] < 1)) {
+            $errors[] = "Wpis $n: kolejność musi być liczbą całkowitą większą od zera.";
+        }
     }
-    return ['errors' => array_slice($errors, 0, 10), 'warnings' => $warnings, 'count' => count($list), 'content' => $json];
+    if (!$errors) {
+        foreach ($list as $i => &$e) {
+            $e['order'] = $i + 1;
+        }
+        unset($e);
+    }
+    $content = !$errors ? json_encode($list, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) : $json;
+    return ['errors' => array_slice($errors, 0, 10), 'warnings' => $warnings, 'count' => count($list), 'content' => $content];
 }
 
 function storeFile(string $name, string $content): void {
@@ -253,7 +262,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
   <input type="file" id="gpx" name="gpx" accept=".gpx,application/gpx+xml,text/xml,application/xml">
   <label for="poi">Punkty POI (poi.json), opcjonalnie</label>
   <input type="file" id="poi" name="poi" accept=".json,application/json">
-  <p class="hint">Nowa trasa bez pliku POI usuwa dotychczasowe punkty. Sam plik POI zmienia tylko punkty. Poprzednia wersja każdego pliku zostaje zachowana jako .prev.</p>
+  <p class="hint">Nowa trasa usuwa dotychczasowe punkty POI. Sam plik POI zmienia tylko punkty i nie usuwa trasy. Poprzednia wersja każdego pliku zostaje zachowana jako .prev.</p>
   <button type="submit">Wgraj</button>
 </form>
 

@@ -69,3 +69,12 @@ Format: data – decyzja – powód – rozważane alternatywy
   mapy/znacznika i press+move są obsługiwane w jednej warstwie edytora; normalny widok
   Leafleta zostaje bez zmian. Save jest atomowym zastąpieniem całego `poi.json` z kopią
   `.prev`, a zamknięcie trybu odrzuca niesaved changes bez pytania.
+- 2026-11-23 – `?s=SEKRET` wybiera nazwę endpointu z publicznego szablonu
+  `update-{secret}.php`; prawdziwy sekret nie trafia do `config.js`. Skrypt sprawdza, że
+  sekret z nazwy pliku jest zgodny z sekretem przesłanym w JSON.
+- 2026-11-23 – Nagłówek strony pozostaje widoczny w trybie edycji. Hamburger jest ukryty,
+  a jego miejsce zajmują przyciski save i zamknięcia trybu. Zamykanie panelu punktu nie
+  zamyka całego trybu. Zamknięcie trybu usuwa `s` z adresu i przeładowuje stronę.
+- 2026-11-23 – Powiadomienie o udanym save jest osobnym wpisem pod istniejącymi
+  powiadomieniami i znika po 2 sekundach. Pola klikalne POI ograniczono do kółka/ikony,
+  bez ogona; w trybie edycji ogon jest dwukrotnie dłuższy niż zwykle.
