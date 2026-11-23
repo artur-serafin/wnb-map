@@ -7,8 +7,16 @@
   "PROBABLY_STILL": "Prawdopodobny postój",
   "SPEED": "{n} km/h",
   "AGO": "{ago} temu",
-  "UNIT_SEC": ["s", "s", "s"],
-  "UNIT_MIN": ["min", "min", "min"],
+  "UNIT_SEC": [
+    "s",
+    "s",
+    "s"
+  ],
+  "UNIT_MIN": [
+    "min",
+    "min",
+    "min"
+  ],
   "SEARCHING": "Szukam Twojej pozycji…",
   "GEO_DENIED": "Brak zgody na lokalizację. Włącz ją w ustawieniach przeglądarki, żeby zobaczyć swoją pozycję.",
   "GEO_UNAVAILABLE": "Nie udało się ustalić Twojej pozycji.",
@@ -36,16 +44,22 @@
   "TYPE_LODY": "Lody",
   "MENU_LANGUAGE": "Język",
   "MENU_PRIVACY": "Prywatność",
-  "START": "Start", 
+  "START": "Start",
   "FINISH": "Meta",
-  "ETA": "ETA ~{t}", 
-  "ETA_STOPPED": "{name} stoi", 
+  "ETA": "ETA ~{t}",
+  "ETA_STOPPED": "{name} stoi",
   "AT_POI": "{name} jest tutaj",
   "PRIVACY": [
     "Pozycję {name} widzą wszyscy, którzy otworzą tę stronę.",
     "Twoja pozycja jest widoczna tylko dla Ciebie. Strona nie wysyła jej ani nie zapisuje na serwerze.",
     "Mapa i biblioteka mapowa są pobierane z zewnętrznych serwerów (OpenStreetMap, cdnjs). Widzą one adres IP Twojego urządzenia i oglądany fragment mapy.",
     "Serwer tej strony zapisuje standardowe logi dostępu (np. adres IP i czas), jak każdy serwer WWW.",
-	"Jeśli włączysz kompas, kierunek, w którym patrzysz, jest używany tylko na Twoim telefonie."
-  ]
+    "Jeśli włączysz kompas, kierunek, w którym patrzysz, jest używany tylko na Twoim telefonie."
+  ],
+  "BTN_MENU_CLOSE": "Zamknij menu",
+  "MENU_LINKS": "Dołącz do nas",
+  "ABOUT_TEXT": "Spotykamy się o 19:00 przy Syrence na Bulwarach Wiślanych i ruszamy na wspólny przejazd przez miasto. Dołącz do Wtorku na Bulwarach i odkrywaj Warszawę na rolkach razem z nami.",
+  "LINK_MESSENGER_TEXT": "Społeczność WnB poznasz na grupie w Messengerze",
+  "LINK_YOUTUBE_TEXT": "Zostaw suba i oglądaj filmy z przejazdów",
+  "LINK_SOCIAL_TEXT": "Obserwuj, komentuj, oglądaj: WnB na Facebooku i Instagramie"
 }

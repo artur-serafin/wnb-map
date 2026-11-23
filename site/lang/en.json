@@ -7,8 +7,16 @@
   "PROBABLY_STILL": "Probably stopped",
   "SPEED": "{n} km/h",
   "AGO": "{ago} ago",
-  "UNIT_SEC": ["s", "s", "s"],
-  "UNIT_MIN": ["min", "min", "min"],
+  "UNIT_SEC": [
+    "s",
+    "s",
+    "s"
+  ],
+  "UNIT_MIN": [
+    "min",
+    "min",
+    "min"
+  ],
   "SEARCHING": "Finding your location…",
   "GEO_DENIED": "Location access denied. Enable it in your browser settings to see your position.",
   "GEO_UNAVAILABLE": "Could not determine your location.",
@@ -36,16 +44,22 @@
   "TYPE_LODY": "Ice cream",
   "MENU_LANGUAGE": "Language",
   "MENU_PRIVACY": "Privacy",
-  "START": "Start", 
+  "START": "Start",
   "FINISH": "Finish",
-  "ETA": "ETA ~{t}", 
-  "ETA_STOPPED": "{name} has stopped", 
+  "ETA": "ETA ~{t}",
+  "ETA_STOPPED": "{name} has stopped",
   "AT_POI": "{name} is here",
   "PRIVACY": [
     "Everyone who opens this page can see the position of {name}.",
     "Your own position is visible only to you. The page does not send it anywhere or store it on the server.",
     "The map and the map library are loaded from external servers (OpenStreetMap, cdnjs). They can see your device's IP address and the part of the map you are viewing.",
     "The server hosting this page keeps standard access logs (e.g. IP address and time), like any web server.",
-	"If you enable the compass, the direction you are facing is used only on your phone."
-  ]
+    "If you enable the compass, the direction you are facing is used only on your phone."
+  ],
+  "BTN_MENU_CLOSE": "Close menu",
+  "MENU_LINKS": "Join us",
+  "ABOUT_TEXT": "We meet at 7 PM by the Syrenka (Mermaid) statue on the Vistula Boulevards and set off together on a ride through the city. Join Wtorek na Bulwarach and discover Warsaw on inline skates with us.",
+  "LINK_MESSENGER_TEXT": "Meet the WnB community in our Messenger group",
+  "LINK_YOUTUBE_TEXT": "Subscribe and watch videos from our rides",
+  "LINK_SOCIAL_TEXT": "Follow, comment, watch: WnB on Facebook and Instagram"
 }

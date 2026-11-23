@@ -20,6 +20,14 @@ const CONFIG = {
   // UWAGA: długość ogona (ile sekund historii) ustawiasz po stronie serwera,
   // w skrypcie ingest-....php (stała TAIL_SECONDS), nie tutaj.
 
+  // ---------- Menu: odnośniki (pusty adres ukrywa dany odnośnik) ----------
+  LINKS: {
+    messenger: 'https://tutajlink.pl',   // grupa / społeczność na Messengerze
+    youtube: 'https://tutajlink.pl',     // kanał na YouTube
+    facebook: 'https://tutajlink.pl',    // profil na Facebooku
+    instagram: 'https://tutajlink.pl'    // profil na Instagramie
+  },
+
   // ---------- Języki ----------
   LANGS: { pl: 'Polski', en: 'English' },  // dostępne języki: kod pliku -> nazwa na przycisku
   DEFAULT_LANG: 'en',               // język, gdy telefon ma inny język niż powyższe
