@@ -22,10 +22,10 @@ const CONFIG = {
 
   // ---------- Menu: odnośniki (pusty adres ukrywa dany odnośnik) ----------
   LINKS: {
-    messenger: 'https://tutajlink.pl',   // grupa / społeczność na Messengerze
-    youtube: 'https://tutajlink.pl',     // kanał na YouTube
-    facebook: 'https://tutajlink.pl',    // profil na Facebooku
-    instagram: 'https://tutajlink.pl'    // profil na Instagramie
+    messenger: 'https://m.me/cm/AbYKXGHWim8ADPrD/',   // grupa / społeczność na Messengerze
+    youtube: 'https://www.youtube.com/@wtoreknabulwarach',     // kanał na YouTube
+    facebook: 'https://www.facebook.com/wtoreknabulwarach',    // profil na Facebooku
+    instagram: 'https://www.instagram.com/wtoreknabulwarach/'    // profil na Instagramie
   },
 
   // ---------- Języki ----------
