@@ -35,6 +35,7 @@
   "EDIT_TYPE": "Typ",
   "EDIT_ORDER": "Kolejność",
   "EDIT_KM": "Kilometr przy trasie",
+  "EDIT_DONE": "Gotowe",
   "EDIT_DELETE": "Usuń punkt",
   "EDIT_SAVE_ERROR": "Nie zapisano zmian",
   "EDIT_VERIFY_ERROR": "Nieprawidłowy sekret",

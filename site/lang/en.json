@@ -35,6 +35,7 @@
   "EDIT_TYPE": "Type",
   "EDIT_ORDER": "Order",
   "EDIT_KM": "Route kilometre",
+  "EDIT_DONE": "Done",
   "EDIT_DELETE": "Delete point",
   "EDIT_SAVE_ERROR": "Changes were not saved",
   "EDIT_VERIFY_ERROR": "Invalid secret",
@@ -58,7 +59,7 @@
   ],
   "BTN_MENU_CLOSE": "Close menu",
   "MENU_LINKS": "Join us",
-  "ABOUT_TEXT": "We meet at 7 PM by the Syrenka (Mermaid) statue on the Vistula Boulevards and set off together on a ride through the city. Join Wtorek na Bulwarach and discover Warsaw on inline skates with us.",
+  "ABOUT_TEXT": "We meet at 7 PM by the Mermaid Statue on the Vistula Boulevards and set off together on a ride through the city. Join Wtorek na Bulwarach and discover Warsaw on inline skates with us.",
   "LINK_MESSENGER_TEXT": "Meet the WnB community in our Messenger group",
   "LINK_YOUTUBE_TEXT": "Subscribe and watch videos from our rides",
   "LINK_SOCIAL_TEXT": "Follow, comment, watch: WnB on Facebook and Instagram"
