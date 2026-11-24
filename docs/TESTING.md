@@ -95,10 +95,10 @@ Cel: sprawdzić to, czego nie da się zasymulować.
 k6 run smoke.js
 k6 run -e INGEST_URL="https://…/ingest-<SEKRET>.php" load.js
 k6 run burst.js
-k6 run -e INGEST_URL="https://…/ingest-<SEKRET>.php" -e START_KM=9 -e STOPS="11.064:90" ride.js
+k6 run -e INGEST_URL="https://…/ingest-<SEKRET>.php" -e START_KM=9 -e SPEED_KMH=18 -e GPX_VARIATION=15 -e STOPS="11.064:90" ride.js
 ```
 
-`load.js` i `ride.js` zapisują sztuczne pozycje do `latest.json` (nie uruchamiaj ich podczas prawdziwego przejazdu); po `load.js` usuń `log/requests.log`, jeśli logowanie było włączone. Adresy w skryptach wskazują środowisko testowe: po przeniesieniu na adres docelowy zmień stałą `BASE`/`URL` na początku pliku.
+`load.js` i `ride.js` zapisują sztuczne pozycje do `live/latest.json` (nie uruchamiaj ich podczas prawdziwego przejazdu); po `load.js` usuń `log/requests.log`, jeśli logowanie było włączone. Adresy w skryptach wskazują środowisko testowe: po przeniesieniu na adres docelowy zmień stałą `BASE`/`URL` na początku pliku.
 
 ## 5. Niezweryfikowane
 

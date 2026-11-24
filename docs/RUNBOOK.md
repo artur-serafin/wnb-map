@@ -171,7 +171,7 @@ Po zmianie wgraj `config.js` na serwer i zamknij oraz ponownie otwórz kartę (p
 
 ## 12. Diagnostyka i testy w domu
 
-- **Symulator przejazdu** (`ride.js` w k6): wysyła sztuczne pozycje wzdłuż `WnB.gpx`. Przykład: `k6 run -e INGEST_URL="…" -e START_KM=9 -e STOPS="11.064:90" ride.js` (sztuczne pozycje trafiają do `latest.json`, nie używaj podczas prawdziwego przejazdu).
+- **Symulator przejazdu** (`ride.js` w k6): wysyła sztuczne pozycje wzdłuż `WnB.gpx`, płynnie zmieniając prędkość w zakresie ±20% wartości `SPEED_KMH` oraz boczne odchylenie od trasy w zakresie `GPX_VARIATION`. Przykład: `k6 run -e INGEST_URL="…" -e START_KM=9 -e SPEED_KMH=18 -e GPX_VARIATION=15 -e STOPS="11.064:90" ride.js` (domyślne odchylenie GPX to 15 m; sztuczne pozycje trafiają do `live/latest.json`, nie używaj podczas prawdziwego przejazdu).
 - **Test obciążeniowy** (`load.js`, `burst.js`): wyniki w `TESTING.md`.
 - **Surowy log pozycji:** w skrypcie `ingest` ustaw `LOG_REQUESTS = true` (zapis do `log/requests.log`, zawiera historię lokalizacji, po testach wyłącz i usuń).
 
