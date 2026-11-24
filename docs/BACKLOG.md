@@ -83,7 +83,7 @@ Kolejność: F1 → F7. F4 jest podstawą dla F5. Brak zmian po stronie serwera:
 
 Kolejność: H1–H4 dane i serwer, H5–H10 mapa i gesty, H11–H13 zapis i testy, H14–H16 dokumentacja i wdrożenie.
 
-- [x] **H1 (M, C)** Rozszerzyć model POI o opcjonalne pola `order` i `km`; typy: `zabka`, `lody`, `default`. Brak pola `type` i nieznany/nowy typ są traktowane jako `default` w przeglądarce i normalizowane do `default` przed zapisem.
+- [x] **H1 (M, C)** Rozszerzyć model POI o opcjonalne pola `order` i `km`; typy: `zabka`, `lody`, `odpoczynek`, `default`. Brak pola `type` i nieznany/nowy typ są traktowane jako `default` w przeglądarce i normalizowane do `default` przed zapisem.
 - [x] **H2 (M, C)** Zmienić renderowanie POI: `default` to kółko bez grafiki z opcjonalną cyfrą kolejności; punkty bez `order` nie pokazują cyfry. Puste lub nieistniejące `km` nie powodują widocznego kilometra w dymku.
 - [x] **H3 (M, C+A)** Poprawić stan bez trasy: POI są ładowane i pokazywane również wtedy, gdy `WnB.gpx` zwraca 404. Przy braku trasy nie pokazuje się kilometr trasy ani przycisk „Cała trasa", a ETA jest całkowicie wyłączone.
 - [x] **H4 (M, C)** Zmienić regułę ETA: jeżeli chociaż jeden punkt POI ma puste lub niepoprawne `km`, ETA nie jest liczone dla żadnego punktu ani mety. Gdy wszystkie punkty mają poprawny `km`, zachować dotychczasową logikę ETA.
@@ -93,7 +93,7 @@ Kolejność: H1–H4 dane i serwer, H5–H10 mapa i gesty, H11–H13 zapis i tes
 - [x] **H8 (M, C)** Zaimplementować long-press na pustej części mapy: po ~650 ms utworzyć jeden POI `default` bez nazwy i kilometra, z ostatnim numerem kolejności. Punkt lokalizować w dokładnym miejscu dotknięcia.
 - [x] **H9 (M, C)** Zaimplementować long-press na znaczniku POI: otworzyć edycję punktu. Kliknięcie zwykłe nadal otwiera zwykły dymek poza trybem edycji; strzałka/ogon znacznika nie może być elementem klikalnym. Aktywne pozostaje tylko kółko/znacznik.
 - [x] **H10 (M, C)** Zaimplementować press+move na znaczniku POI: zablokować przesuwanie mapy przez ten gest, przesuwać lokalny marker pod wskaźnikiem i przesuwać mapę brzegową, gdy wskaźnik dotrze do krawędzi ekranu. Po puszczeniu zapisać lokalną nową współrzędną, bez natychmiastowego zapisu.
-- [x] **H11 (M, C)** W pop-overze edycji dodać pola: nazwa, typ (`default`, `zabka`, `lody`), kolejność (lista 1…N, bez wpisywania), kilometr trasy (tekst, przecinek lub kropka, opcjonalnie pusty), usunięcie punktu oraz osobny przycisk zamknięcia panelu.
+- [x] **H11 (M, C)** W pop-overze edycji dodać pola: nazwa, typ (`default`, `zabka`, `lody`, `odpoczynek`), kolejność (lista 1…N, bez wpisywania), kilometr trasy (tekst, przecinek lub kropka, opcjonalnie pusty), usunięcie punktu oraz osobny przycisk zamknięcia panelu.
 - [x] **H12 (M, C)** Zmienić kolejność w trybie edycji przez przesunięcie punktu w nową pozycję i automatyczne przenumerowanie pozostałych punktów do ciągu 1…N. Zmiana kolejności musi być natychmiast widoczna na wszystkich znacznikach.
 - [x] **H13 (M, C+A)** Wszystkie dodania, przeniesienia, edycje i usunięcia trzymać tylko w lokalnej kopii `poi.json` w pamięci przeglądarki aż do „save". Zamknięcie panelu nie zamyka trybu. Zamknięcie trybu usuwa `s`, odrzuca zmiany i przeładowuje stronę.
 - [x] **H14 (S, C+A)** Obsłużyć błędy sekretu i zapisu: poprawny kod HTTP dla niepoprawnego sekretu, błąd walidacji, błąd serwera i brak zmiany pliku przy odrzuceniu zapisu. Lokalny stan POI pozostaje nietknięty po błędzie save.

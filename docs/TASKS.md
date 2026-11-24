@@ -20,7 +20,7 @@ Stan: backlog i design przygotowane przed implementacją. Nie oznacza to rozpocz
 - Kryterium: samo POI bez wszystkich nowych pól nadal jest poprawne.
 
 ### T-02 – Zaktualizować walidację uploadu i save
-- Akceptować `zabka`, `lody`, `default` i brak `type`.
+- Akceptować `zabka`, `lody`, `odpoczynek`, `default` i brak `type`.
 - Odrzucać niepoprawną pozycję i złą kolejność.
 - Nie wymagać `km`.
 - Dopisać ostrzeżenie o kilometrze większym od trasy.
@@ -48,7 +48,7 @@ Stan: backlog i design przygotowane przed implementacją. Nie oznacza to rozpocz
 - Kółko bez grafiki, kolor przez CSS/Leaflet.
 - Cyfra `order` wyśrodkowana w kółku.
 - Ogon oraz popup nadal zachowują dotychczasową logikę.
-- Kryterium: punkty `default`, `zabka`, `lody` są różne i czytelne.
+- Kryterium: punkty `default`, `zabka`, `lody`, `odpoczynek` są różne i czytelne.
 
 ### T-06 – Naprawić POI bez trasy i km
 - `noRoute()` musi wywołać `loadPoi()`.

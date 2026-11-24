@@ -54,7 +54,7 @@ Stan na 2026-11-20. **Organizator (WnB)** udostępnia pozycję i wgrywa trasę, 
 |---|---|---|
 | F-50 | Punkt POI może nie mieć `km`; punkty bez kilometra są widoczne na mapie także bez trasy | TEL |
 | F-51 | Jeżeli dowolny punkt POI nie ma poprawnego `km`, ETA nie jest pokazywane dla żadnego punktu ani mety | MAT, SYM |
-| F-52 | Typy POI: `zabka`, `lody`, `default`; brak lub nieznany typ jest interpretowany jako `default` | MAT, TEL |
+| F-52 | Typy POI: `zabka`, `lody`, `odpoczynek`, `default`; brak lub nieznany typ jest interpretowany jako `default` | MAT, TEL |
 | F-53 | Opcjonalne pole `order` ustala kolejność i jest wyświetlane jako cyfra w znaczniku `default`; punkty bez `order` nie mają cyfry | TEL |
 | F-54 | Dostęp do trybu edycji wymaga poprawnego sekretu w URL i ponownej walidacji sekretu przy zapisaniu | TEL, PHP |
 | F-55 | Tryb edycji zachowuje nagłówek; hamburger zostaje zastąpiony przyciskami save i zamknięcia trybu. Panel punktu można zamknąć bez zamykania całego trybu | TEL |

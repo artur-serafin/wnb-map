@@ -51,11 +51,11 @@ Sekrety przechowuj w menedżerze haseł. To jedyne zabezpieczenie: kto zna adres
 [
   { "type": "zabka", "name": "Żabka – przykład", "pos": "52.2184058, 21.0151354", "km": "12,524", "order": 1 },
   { "type": "lody",  "name": "Lody – przykład",  "lat": 52.2301, "lon": 21.0122, "km": 17.480, "order": 2 },
-  { "type": "default", "name": "Miejsce spotkania", "pos": "52.2251, 21.0102", "order": 3 }
+  { "type": "odpoczynek", "name": "Miejsce odpoczynku", "pos": "52.2251, 21.0102", "order": 3 }
 ]
 ```
 
-- `type`: `zabka` (planowy postój w sklepie), `lody` (planowy postój na lody) albo `default` (kółko bez grafiki).
+- `type`: `zabka` (planowy postój w sklepie), `lody` (planowy postój na lody), `odpoczynek` (miejsce odpoczynku) albo `default` (kółko bez grafiki).
 - Brak `type` lub nieznana wartość oznacza `default`.
 - `order`: opcjonalna kolejność jako liczba `1`, `2`, `3` itd. Punkt bez `order` nie pokazuje cyfry w środku.
 - Pozycja: `pos` wklejone z Google Maps (prawy przycisk na mapie, pierwsza linia) **albo** `lat` i `lon`.

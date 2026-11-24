@@ -58,7 +58,7 @@ Format: data – decyzja – powód – rozważane alternatywy
   Alternatywa z logowaniem administratora została odrzucona jako zbyt duży koszt i zależność
   dla jednorazowego narzędzia organizatora.
 - 2026-11-22 – Pola POI: `order` jest opcjonalnym dodatnim całkowitoliczbowym indeksem,
-  `type` przyjmuje `zabka`, `lody` lub `default`, a brak/nieznana wartość jest normalizowana
+  `type` przyjmuje `zabka`, `lody`, `odpoczynek` lub `default`, a brak/nieznana wartość jest normalizowana
   do `default`. UI przenosi element i normalizuje pozostałe wartości do ciągu 1…N.
   Sam JSON może zawierać brakujące `order` i `km`; plik zapisany przez edytor normalizuje
   kolejność wszystkich istniejących punktów.

@@ -11,7 +11,7 @@ const POI_NAME      = 'poi.json';
 const MAX_GPX_BYTES = 2000000;           // maksymalny rozmiar pliku GPX
 const MAX_POI_BYTES = 200000;            // maksymalny rozmiar pliku poi.json
 const MAX_POINTS    = 5000;              // maksymalna liczba punktów trasy
-const POI_TYPES     = ['zabka', 'lody', 'default']; // musi zgadzać się z typami ikon na stronie
+const POI_TYPES     = ['zabka', 'lody', 'odpoczynek', 'default']; // musi zgadzać się z typami ikon na stronie
 // ======================
 
 date_default_timezone_set('Europe/Warsaw');

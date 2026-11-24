@@ -134,7 +134,7 @@ Wdrożenie ręczne przez FTP (prawdziwe skrypty z sekretem w nazwie istnieją ty
 ```
 
 - `pos` albo `lat`/`lon` opisują pozycję.
-- `type` jest opcjonalny i normalizowany do `default`, gdy jest pusty albo nieznany.
+- `type` jest opcjonalny i normalizowany do `default`, gdy jest pusty albo nieznany. Obsługiwane wartości to `zabka`, `lody`, `odpoczynek` i `default`.
 - `order` jest opcjonalny. Zapis edytora normalizuje punkty do kolejności `1...N`.
 - `km` jest opcjonalny i może być liczbą albo tekstem z przecinkiem. Puste pole oznacza „bez kilometra".
 - Dla punktu bez `order` znacznik nie pokazuje cyfry. Dla punktu bez `km` dymek nie pokazuje kilometra.

@@ -7,7 +7,7 @@
 const DATA_DIR = __DIR__ . '/data';
 const POI_NAME = 'poi.json';
 const MAX_BODY_BYTES = 200000;
-const POI_TYPES = ['zabka', 'lody', 'default'];
+const POI_TYPES = ['zabka', 'lody', 'odpoczynek', 'default'];
 
 date_default_timezone_set('Europe/Warsaw');
 header('Content-Type: application/json; charset=utf-8');
