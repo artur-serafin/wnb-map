@@ -37,7 +37,7 @@ const CONFIG = {
   POI_ICON_SIZE_PX: 34,				// rozmiar ikony POI
   POI_TAIL_PX: 35,                  // długość ogona znacznika POI (px): odległość kółka od wskazywanego punktu
   SHOW_ETA: true,                   // etykiety ETA przy punktach i mecie (false = ukryj)
-  ROUTE_MAX_OFFSET_METERS: 200,     // dalej niż tyle metrów od trasy WnB uznajemy za "poza trasą" (bez ETA)
+  ROUTE_MAX_OFFSET_METERS: 20,      // dalej niż tyle metrów od trasy WnB uznajemy za "poza trasą" (bez ETA)
   POI_AT_METERS: 100,               // blisko punktu = w odległości do tylu metrów
   ETA_ROUND_MINUTES: 5,              // ETA powyżej 10 min zaokrąglamy do tylu minut (1 = bez zaokrąglania)
   SHOW_GLOW: true,                  // false = wyłącz poświatę
