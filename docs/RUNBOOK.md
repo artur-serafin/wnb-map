@@ -156,7 +156,10 @@ Wszystkie ustawienia mają komentarze w pliku. Najczęściej zmieniane:
 |---|---|---|
 | `STOP_AFTER_SECONDS` | 90 | po ilu sekundach bez danych pokazać „Prawdopodobny postój" |
 | `LOST_AFTER_SECONDS` | 480 | po ilu sekundach „Brak sygnału" |
-| `END_AFTER_SECONDS` | 900 | po ilu sekundach „Udostępnianie zakończone" |
+| `END_AFTER_SECONDS` | 900 | po ilu sekundach znacznik WnB znika (bez osobnego statusu „zakończone") |
+| `STATUS_FADE_MS` | 250 | czas fade-in/fade-out statusów (ms) |
+| `STATUS_TEMPORARY_MS` | 2000 | czas widoczności statusów tymczasowych (ms) |
+| `IDLE_USE_SEASONAL_NOTICE` | false | `true` wybiera zimowy wariant komunikatu bez trasy |
 | `POLL_SECONDS` | 8 | jak często strona pobiera pozycję WnB |
 | `POI_AT_METERS` | 100 | jak blisko punktu WnB jest „w punkcie" |
 | `ETA_ROUND_MINUTES` | 5 | zaokrąglenie ETA powyżej 10 minut |
@@ -168,6 +171,8 @@ Wszystkie ustawienia mają komentarze w pliku. Najczęściej zmieniane:
 | `SPLASH_FADE_MS` | 1000 | czas animacji zanikania ekranu startowego |
 
 Po zmianie wgraj `config.js` na serwer i zamknij oraz ponownie otwórz kartę (przeglądarka mogła zapamiętać stary plik).
+
+Komunikaty standardowy i zimowy oraz ich tłumaczenia są w `lang/pl.json` i `lang/en.json`. Pliki są JSON-em, dlatego oba warianty pozostają aktywnymi wpisami; sezon zmienia się przez `IDLE_USE_SEASONAL_NOTICE` w `config.js`. Tekst o wtorkowym starcie o 19:00 jest w kluczu `IDLE_NOTICE_START`.
 
 ## 12. Diagnostyka i testy w domu
 

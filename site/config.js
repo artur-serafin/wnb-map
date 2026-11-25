@@ -3,7 +3,7 @@
 //  Edytujesz tylko wartości po dwukropku. Po zmianie wgraj plik
 //  na serwer (czasem trzeba odświeżyć stronę mocniej, np. zamknąć
 //  i otworzyć kartę, żeby zobaczyć zmianę).
-//  Czasy podajemy w SEKUNDACH, prędkości w km/h.
+//  Progi podajemy w sekundach, czasy statusów/animacji w milisekundach, prędkości w km/h.
 //  Teksty (PL/EN) są w osobnych plikach: lang/pl.json i lang/en.json.
 // ============================================================
 const CONFIG = {
@@ -13,8 +13,11 @@ const CONFIG = {
   POI_URL: 'data/poi.json',         // plik z punktami POI
   UPDATE_URL_TEMPLATE: 'update-{secret}.php', // szablon; {secret} zastępuje wartość ?s=SEKRET
   NO_ROUTE_TITLE: 'Wtorek na Bulwarach', // tytuł trasy, gdy nie ma pliku GPX (np. w trakcie tworzenia trasy)
+  IDLE_USE_SEASONAL_NOTICE: false,    // true = komunikat dla okresu zimowego
   LIVE_URL: 'live/latest.json',     // plik z pozycją WnB, tworzony przez skrypt ingest
   LANG_DIR: 'lang/',                // folder z plikami językowymi
+  STATUS_FADE_MS: 250,              // czas pojawiania i zanikania statusu (ms)
+  STATUS_TEMPORARY_MS: 2000,        // czas widoczności statusu tymczasowego (ms)
   SPLASH_HOLD_MS: 1500,              // ile ms ekran startowy pozostaje na pełnym ekranie
   SPLASH_FADE_MS: 1000,             // czas zanikania ekranu startowego
   // UWAGA: długość ogona (ile sekund historii) ustawiasz po stronie serwera,
@@ -68,8 +71,7 @@ const CONFIG = {
                                     // powyżej dodaje "X sekund temu"
   STOP_AFTER_SECONDS: 90,           // tyle s bez nowych danych (gdy WnB jechał) = "Prawdopodobny postój"
   LOST_AFTER_SECONDS: 480,          // tyle s bez danych = "Brak sygnału" (znacznik szary, ramka u góry); 480 = 8 min
-  END_AFTER_SECONDS: 900,           // tyle s bez danych = "Udostępnianie zakończone",
-                                    // znacznik znika; 900 = 15 min
+  END_AFTER_SECONDS: 900,           // tyle s bez danych znacznik znika; 900 = 15 min
   STILL_SPEED_KMH: 2,               // poniżej tej prędkości (albo gdy brak prędkości) = "Postój"
 
   // ---------- Mapa ----------

@@ -24,7 +24,9 @@ także w tle.
   pozycja organizatora.
 - Ogon organizatora: ostatnie 2 min (parametr konfiguracyjny).
 - Brak start/stop w aplikacji: stan wynika z tego, czy dociera pozycja.
-  Brak aktualnej pozycji => komunikat dla uczestnika, trasa nadal widoczna.
+  Komunikacja rozróżnia trasę i dostępność znacznika WnB; POI nie wpływają na stan.
+- Tytuły i statusy są tłumaczone; statusy wyświetlają się w stosie z animacją,
+  a czas zanikania i czas statusów tymczasowych są ustawiane w `config.js`.
 - Widoczność: każdy widzi organizatora i siebie; nikt nie widzi innych
   uczestników; pozycje uczestników nie są przechowywane.
 - Języki: PL i EN, teksty w edytowalnych plikach językowych.

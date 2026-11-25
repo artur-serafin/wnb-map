@@ -44,9 +44,15 @@ if (window.location.protocol === 'http:') {
   #map { position: absolute; inset: 0; }
   #notes { position: absolute; top: 10px; left: 0; right: 0; z-index: 1000; display: flex; flex-direction: column; align-items: center; gap: 6px; pointer-events: none; }
   .pill { font-variant-numeric: tabular-nums; max-width: 90%; padding: .35rem .9rem; border-radius: 999px; background: rgba(20,33,61,.82); color: #fff; font-size: .9rem; text-align: center; }
-  .pill[hidden], #menuLayer[hidden] { display: none; }
+  .statusItem { opacity: 0; transition-property: opacity; transition-timing-function: ease; }
+  .statusItem.statusVisible { opacity: 1; }
+  #notes:empty, #idleNotice[hidden], #menuLayer[hidden] { display: none; }
+  #idleNotice { position: absolute; z-index: 850; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(calc(100% - 40px), 480px); box-sizing: border-box; padding: 1rem 1.2rem; border: 1px solid rgba(255,255,255,.2); border-radius: 16px; background: rgba(20,33,61,.82); color: #fff; text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,.2); pointer-events: none; }
+  #idleNotice p { margin: .35rem 0; }
+  #idleNotice p:first-child { font-weight: 700; }
   .fabs { position: absolute; right: calc(12px + env(safe-area-inset-right, 0px)); bottom: calc(12px + env(safe-area-inset-bottom, 0px)); z-index: 1000; display: flex; flex-direction: column; gap: 8px; }
   .fab { width: 44px; height: 44px; padding: 0; display: grid; place-items: center; border: 0; border-radius: 10px; background: rgba(255,255,255,.95); color: #14213d; box-shadow: 0 1px 6px rgba(0,0,0,.35); }
+  .fab.isUnavailable { opacity: .48; filter: grayscale(1); }
   .gap { height: 8px; }
   .fab[hidden] { display: none; }
   /* ---------- menu pełnoekranowe ---------- */
@@ -107,6 +113,7 @@ if (window.location.protocol === 'http:') {
   .leaflet-tooltip.etatip::before { display: none; }
   .kmpop .sub { font-weight: 500; font-size: .8rem; opacity: .7; }
   body.editMode #menuLayer { display: none; }
+  body.editMode #idleNotice { display: none; }
   body.editMode .leaflet-control-attribution { display: none; }
   #poiEditor { position: absolute; left: 50%; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 1250; width: min(calc(100% - 24px), 360px); box-sizing: border-box; border-radius: 14px; background: #fff; color: #14213d; box-shadow: 0 4px 18px rgba(0,0,0,.4); padding: .8rem; }
   #poiEditor[hidden] { display: none; }
@@ -137,7 +144,10 @@ if (window.location.protocol === 'http:') {
 <div class="stage">
   <div id="map"></div>
   <div id="glowLayer"><div id="glow"></div><div id="glowDist"></div></div>
-  <div id="notes"><div class="pill" id="statusBox" hidden></div><div class="pill" id="geoBox" hidden></div><div class="pill" id="saveBox" hidden></div></div>
+  <div id="notes" aria-live="polite" aria-atomic="false"></div>
+  <div id="idleNotice" hidden aria-live="polite">
+    <p id="idleNoticeIntro"></p><p id="idleNoticeDetails"></p><p id="idleNoticeStart"></p>
+  </div>
   <div class="fabs">
     <button class="fab" id="btnIn"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
     <button class="fab" id="btnOut"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
@@ -197,9 +207,58 @@ if (window.location.protocol === 'http:') {
 <script>
 const C = CONFIG, COL = C.COLORS;
 const $ = id => document.getElementById(id);
-const setPill = (el, text) => { el.hidden = !text; if (text) el.textContent = text; };
 let T = {}, lang = null;
 const fill = s => (s || '').replace('{name}', C.ORGANIZER_NAME);
+const statusItems = new Map();
+const STATUS_FADE_MS = Math.max(0, Number(C.STATUS_FADE_MS) || 0);
+const STATUS_TEMPORARY_MS = Math.max(0, Number(C.STATUS_TEMPORARY_MS) || 0);
+
+function setStatus(key, text, temporary) {
+  let item = statusItems.get(key);
+  if (!text) {
+    if (!item || !item.visible) return;
+    item.visible = false;
+    if (item.timer) clearTimeout(item.timer);
+    item.timer = setTimeout(() => {
+      if (statusItems.get(key) !== item || item.visible) return;
+      item.node.remove();
+      statusItems.delete(key);
+    }, STATUS_FADE_MS);
+    item.node.classList.remove('statusVisible');
+    return;
+  }
+  if (!item) {
+    const node = document.createElement('div');
+    node.className = 'pill statusItem';
+    node.setAttribute('role', 'status');
+    node.style.transitionDuration = STATUS_FADE_MS + 'ms';
+    item = { node, visible: false, timer: null, temporary: !!temporary };
+    statusItems.set(key, item);
+    $('notes').appendChild(node);
+  }
+  if (item.timer) clearTimeout(item.timer);
+  item.timer = null;
+  item.temporary = !!temporary;
+  item.node.textContent = text;
+  if (!item.visible) {
+    item.visible = true;
+    requestAnimationFrame(() => {
+      if (statusItems.get(key) === item && item.visible) item.node.classList.add('statusVisible');
+    });
+  }
+  if (temporary) {
+    item.timer = setTimeout(() => setStatus(key, null, false), STATUS_TEMPORARY_MS);
+  }
+}
+
+function setPersistentStatus(key, text) {
+  setStatus('persistent:' + key, text, false);
+}
+
+function showTemporaryStatus(text) {
+  const key = 'temporary:' + text;
+  setStatus(key, text, true);
+}
 
 // ---------- języki ----------
 function pickLang() {
@@ -255,8 +314,10 @@ function applyTexts() {
   $('poiDelete').textContent = T.EDIT_DELETE || '';
   const typeLabels = { default: T.TYPE_DEFAULT, zabka: T.TYPE_ZABKA, lody: T.TYPE_LODY, odpoczynek: T.TYPE_ODPOCZYNEK };
   for (const option of $('poiType').options) option.textContent = typeLabels[option.value] || option.value;
-  if (routeFailed) $('title').textContent = T.ROUTE_ERROR;
-  refreshSfLabels(); renderGeo(); renderLive(); renderEta();
+  $('idleNoticeIntro').textContent = T.IDLE_NOTICE_INTRO || '';
+  $('idleNoticeDetails').textContent = C.IDLE_USE_SEASONAL_NOTICE ? (T.IDLE_NOTICE_SEASONAL || '') : (T.IDLE_NOTICE_STANDARD || '');
+  $('idleNoticeStart').textContent = T.IDLE_NOTICE_START || '';
+  refreshSfLabels(); renderGeo(); renderLive(); renderPageState(); renderEta();
 }
 
 // ---------- menu (pełny ekran) ----------
@@ -347,8 +408,36 @@ map.createPane('routePane').style.zIndex = 390;   // trasa pod ogonem i znacznik
 map.createPane('arrowPane').style.zIndex = 395;   // strzałki kierunku nad trasą
 map.createPane('beamPane').style.zIndex = 399;    // wskaźnik kierunku ruchu Uczestnika pod jego kropką
 L.tileLayer(C.TILE_URL, { maxZoom: C.MAX_ZOOM, attribution: C.TILE_ATTRIBUTION }).addTo(map);
-let routeBounds = null, routeFailed = false, routePts = [], routeCum = [], startMarker = null, finishMarker = null;
+let routeBounds = null, routePts = [], routeCum = [], startMarker = null, finishMarker = null;
+let routeState = 'loading', routeTitle = C.NO_ROUTE_TITLE || '', routeDistance = '';
 const focus = ll => map.setView(ll, Math.max(map.getZoom(), C.FOCUS_ZOOM));
+
+function renderPageState() {
+  if (!lang) return;
+  const hasRoute = routeState === 'available';
+  const hasLocation = !!orgMarker;
+  const title = $('title');
+  if (routeState === 'error') {
+    title.textContent = T.ROUTE_ERROR || '';
+  } else if (hasRoute) {
+    const template = hasLocation ? T.TITLE_JOIN_WITH_ROUTE : T.TITLE_NEXT_ROUTE;
+    title.textContent = (template || '{title} – {distance}')
+      .replace('{title}', routeTitle).replace('{distance}', routeDistance);
+  } else if (hasLocation) {
+    title.textContent = (T.TITLE_JOIN_NO_ROUTE || '{title}').replace('{title}', routeTitle);
+  } else {
+    title.textContent = C.NO_ROUTE_TITLE || '';
+  }
+  $('idleNotice').hidden = routeState !== 'none' || hasLocation || document.body.classList.contains('editMode');
+  const lost = hasLocation && orgLocationAge() > C.LOST_AFTER_SECONDS;
+  const unavailable = !hasLocation || lost;
+  $('btnOrg').classList.toggle('isUnavailable', unavailable);
+}
+
+function orgLocationAge() {
+  if (!org || !org.last) return Infinity;
+  return (Date.now() + serverOffset) / 1000 - org.last.ts;
+}
 
 function km(a, b) {
   const R = 6371, rad = Math.PI / 180, dLat = (b[0] - a[0]) * rad, dLon = (b[1] - a[1]) * rad;
@@ -366,12 +455,12 @@ function fmtAgo(s) {
 
 // ---------- trasa ----------
 async function noRoute() {   // przejazd bez trasy: pokazujemy mapę i POI, bez ETA i kilometra trasy
-  routeFailed = false;
-  const t = C.NO_ROUTE_TITLE || '';
-  $('title').textContent = t;
-  if (t) document.title = t;
+  routeState = 'none';
+  routeTitle = C.NO_ROUTE_TITLE || '';
+  if (routeTitle) document.title = routeTitle;
   $('btnFit').hidden = true;   // przycisk "Cała trasa" nie ma wtedy sensu
   await loadPoi();
+  renderPageState();
 }
 async function loadRoute() {
   try {
@@ -393,15 +482,18 @@ async function loadRoute() {
     for (let i = 1; i < pts.length; i++) routeCum.push(routeCum[i - 1] + km(pts[i - 1], pts[i]));
     const total = routeCum[routeCum.length - 1];
     routePts = pts;
+    routeState = 'available';
+    routeTitle = name;
+    routeDistance = total.toFixed(1).replace('.', ',') + ' km';
     const line = L.polyline(pts, { color: COL.route, weight: C.ROUTE_WIDTH, opacity: .9, pane: 'routePane' }).addTo(map);
     addStartFinish(pts);
     routeBounds = line.getBounds();
     map.fitBounds(routeBounds, { padding: [C.FIT_PADDING, C.FIT_PADDING] });
     prepRoute(); drawArrows(); updateFar(); await loadPoi(); updateProgress(); renderEta();
-    $('title').textContent = name + ' - ' + total.toFixed(1).replace('.', ',') + ' km';
     document.title = name;
+    renderPageState();
   } catch (e) {
-    routeFailed = true; $('title').textContent = T.ROUTE_ERROR || '';
+    routeState = 'error'; renderPageState();
   }
 }
 
@@ -629,14 +721,8 @@ async function loadPoi() {   // plik POI jest opcjonalny
 
   // ---------- tryb edycji POI ----------
   let editMode = false, editSecret = null, editPois = [], editingPoiId = null, editVerifyTimer = null;
-  let editSaveNoticeTimer = null;
   function showEditSaveSuccess() {
-    if (editSaveNoticeTimer) clearTimeout(editSaveNoticeTimer);
-    setPill($('saveBox'), T.EDIT_SAVE_SUCCESS || 'POI changes saved');
-    editSaveNoticeTimer = setTimeout(() => {
-      editSaveNoticeTimer = null;
-      setPill($('saveBox'), null);
-    }, 2000);
+    showTemporaryStatus(T.EDIT_SAVE_SUCCESS || 'POI changes saved');
   }
   function editUpdateUrl(secret) {
     const template = C.UPDATE_URL_TEMPLATE || 'update-{secret}.php';
@@ -947,10 +1033,20 @@ function bubbleText(age, speed) {
 
 function renderLive() {
   if (!polled || !lang) return;
-  const failed = failCount >= C.FAIL_AFTER_POLLS, bad = failed ? T.NO_CONNECTION : null, box = $('statusBox');
-  if (!org) { removeOrg(); setPill(box, bad || (failCount > 0 ? null : fill(T.NO_DATA))); return; }
+  const failed = failCount >= C.FAIL_AFTER_POLLS, bad = failed ? T.NO_CONNECTION : null;
+  if (!org) {
+    removeOrg();
+    setPersistentStatus('live', bad || (failCount > 0 ? null : fill(T.NO_DATA)));
+    renderPageState();
+    return;
+  }
   const age = (Date.now() + serverOffset) / 1000 - org.last.ts;
-  if (age > C.END_AFTER_SECONDS) { removeOrg(); setPill(box, bad || T.ENDED); return; }
+  if (age > C.END_AFTER_SECONDS) {
+    removeOrg();
+    setPersistentStatus('live', bad);
+    renderPageState();
+    return;
+  }
 
   const ll = [org.last.lat, org.last.lon], pts = (org.tail || []).map(p => [p[0], p[1]]);
   const text = bubbleText(age, org.last.speed_kmh), lost = age > C.LOST_AFTER_SECONDS;
@@ -962,7 +1058,8 @@ function renderLive() {
   orgMarker.setLatLng(ll); tailCase.setLatLngs(pts); tail.setLatLngs(pts);
   orgMarker.setStyle({ fillColor: lost ? COL.organizerLost : COL.organizer });
   orgMarker.setTooltipContent(text);
-  setPill(box, bad || (lost ? fill(T.LOST) : null));
+  setPersistentStatus('live', bad || (lost ? fill(T.LOST) : null));
+  renderPageState();
 }
 
 // ---------- postęp WnB na trasie (km) i ETA ----------
@@ -1130,7 +1227,7 @@ map.on('move moveend zoomend resize', updateGlow);
 // ---------- pozycja Uczestnika (włącza się automatycznie) ----------
 let meMarker = null, meCircle = null, watchId = null, geoKey = null;
 function setGeo(key) { geoKey = key; renderGeo(); }
-function renderGeo() { setPill($('geoBox'), geoKey ? T[geoKey] : null); }
+function renderGeo() { setPersistentStatus('geo', geoKey ? T[geoKey] : null); }
 function startLocating() {
   if (!('geolocation' in navigator)) { setGeo('GEO_UNSUPPORTED'); return; }
   if (watchId !== null) return;
@@ -1228,7 +1325,11 @@ function onGeoError(err) {
 $('btnIn').onclick = () => map.zoomIn();
 $('btnOut').onclick = () => map.zoomOut();
 $('btnFit').onclick = () => { if (routeBounds) map.fitBounds(routeBounds, { padding: [C.FIT_PADDING, C.FIT_PADDING] }); };
-$('btnOrg').onclick = () => { if (orgMarker) focus(orgMarker.getLatLng()); };
+$('btnOrg').onclick = () => {
+  if (!orgMarker) showTemporaryStatus(T.ORG_LOCATION_NOT_AVAILABLE || '');
+  else if (orgLocationAge() > C.LOST_AFTER_SECONDS) showTemporaryStatus(T.ORG_LOCATION_TEMPORARILY_UNAVAILABLE || '');
+  else focus(orgMarker.getLatLng());
+};
 $('btnMe').onclick = () => { startCompass(); if (meMarker) focus(meMarker.getLatLng()); else startLocating(); };
 
 function showSplash() {

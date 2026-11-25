@@ -1,6 +1,6 @@
 # REQUIREMENTS: mapa przejazdu rolkowego
 
-Stan na 2026-11-20. **Organizator (WnB)** udostępnia pozycję i wgrywa trasę, **Uczestnik** ogląda stronę. Weryfikacja: **K6** = test obciążeniowy, **SYM** = symulator przejazdu (`ride.js`), **TEL** = ręczny test Artura na telefonie, **TEREN** = do potwierdzenia na prawdziwym przejeździe.
+Stan na 2026-11-25. **Organizator (WnB)** udostępnia pozycję i wgrywa trasę, **Uczestnik** ogląda stronę. Weryfikacja: **K6** = test obciążeniowy, **SYM** = symulator przejazdu (`ride.js`), **TEL** = ręczny test Artura na telefonie, **TEREN** = do potwierdzenia na prawdziwym przejeździe.
 
 ## 1. Wymagania funkcjonalne
 
@@ -19,7 +19,7 @@ Stan na 2026-11-20. **Organizator (WnB)** udostępnia pozycję i wgrywa trasę, 
 |---|---|---|
 | F-10 | Strona pokazuje bieżącą pozycję WnB i ogon z ostatnich 2 minut | TEL, SYM |
 | F-11 | Dymek przy WnB: prędkość, a przy danych starszych niż 15 s także wiek („35 s temu") | TEL, SYM |
-| F-12 | Stany: „Postój", „Prawdopodobny postój" (po 90 s), „Brak sygnału" (po 8 min), „Udostępnianie zakończone" (po 15 min); progi konfigurowalne | TEL, SYM |
+| F-12 | Stany: „Postój", „Prawdopodobny postój" (po 90 s), „Brak sygnału" (po 8 min); po 15 min znacznik znika. Progi i zachowanie znacznika pozostają konfigurowalne; po 15 min nie ma osobnego statusu „Udostępnianie zakończone" | TEL, SYM |
 | F-13 | Brak start/stop w aplikacji: stan wynika z napływu pozycji | TEL |
 | F-14 | Wiek pozycji liczony według czasu serwera, nie zegara telefonu | K6, TEL |
 
@@ -48,6 +48,8 @@ Stan na 2026-11-20. **Organizator (WnB)** udostępnia pozycję i wgrywa trasę, 
 | F-41 | Nowy GPX usuwa stare punkty POI; sam POI nie usuwa ani nie zastępuje GPX; usunięcie może usunąć trasę i POI razem; przechowywana jest jedna poprzednia wersja (`.prev`) | TEL |
 | F-42 | Interfejs po polsku i angielsku, teksty w plikach językowych; menu z wyborem języka i informacją o prywatności | TEL |
 | F-43 | Wszystkie progi i ustawienia w jednym pliku `config.js` z komentarzami | TEL |
+| F-44 | Komunikaty statusów układają się przyrostowo; wszystkie są stałe poza tymczasowymi komunikatami, których duplikat resetuje czas. Zanikanie i widoczność statusów mają wspólne czasy konfiguracyjne | TEL |
+| F-45 | Komunikacja i tytuł zależą od obecności trasy i znacznika WnB; POI nie wpływają na stan. W trybie edycji dodatkowa plansza informacyjna jest ukryta, statusy pozostają widoczne | TEL |
 
 ### Punkty POI i tryb edycji
 | ID | Wymaganie | Weryfikacja |
@@ -61,7 +63,7 @@ Stan na 2026-11-20. **Organizator (WnB)** udostępnia pozycję i wgrywa trasę, 
 | F-56 | Długi dotyk mapy tworzy jeden POI `default` z ostatnią kolejnością i pustym kilometrem; długi dotyk znacznika otwiera jego edycję | TEL |
 | F-57 | Press+move znacznika przesuwa tylko lokalny punkt POI i nie przesuwa mapy; przy krawędzi mapy może uruchomić przesuwanie widoku | TEL |
 | F-58 | Save zapisuje atomowo całą bieżącą listę POI do `poi.json`; porażka save zostawia lokalny stan edycji i plik serwerowy bez zmian | TEL, PHP |
-| F-59 | Po udanym save jest osobne dwusekundowe powiadomienie; zamknięcie trybu usuwa `s` z URL i przeładowuje stronę | TEL |
+| F-59 | Po udanym save jest tymczasowe powiadomienie o czasie z `config.js`; zamknięcie trybu usuwa `s` z URL i przeładowuje stronę | TEL |
 | F-60 | Klikalny obszar POI obejmuje tylko kółko/znacznik, nie ogon; POI bez nazwy i kilometra nie otwiera pustego dymka | TEL |
 
 ## 2. Wymagania niefunkcjonalne i ograniczenia

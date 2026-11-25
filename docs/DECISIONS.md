@@ -78,3 +78,9 @@ Format: data – decyzja – powód – rozważane alternatywy
 - 2026-11-23 – Powiadomienie o udanym save jest osobnym wpisem pod istniejącymi
   powiadomieniami i znika po 2 sekundach. Pola klikalne POI ograniczono do kółka/ikony,
   bez ogona; w trybie edycji ogon jest dwukrotnie dłuższy niż zwykle.
+- 2026-11-25 – Komunikacja strony zależy od trasy i znacznika WnB, niezależnie od POI.
+  Status „Udostępnianie pozycji zakończone” nie jest wyświetlany, ale progi LOST/END
+  i zachowanie znacznika pozostają bez zmian. Tytuł dla trasy z lokalizacją brzmi
+  „Dołącz do nas: {tytuł} – {długość}”. Czasy animacji i statusów tymczasowych są
+  konfigurowalne; wariant zimowy tekstu przełącza ustawienie w `config.js`, ponieważ
+  pliki językowe są JSON-em i nie mogą zawierać zakomentowanych wpisów.
