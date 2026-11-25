@@ -1,7 +1,6 @@
 {
   "NO_DATA": "Brak danych od {name}",
   "NO_CONNECTION": "Brak połączenia z serwerem",
-  "LOST": "Brak sygnału od {name}",
   "ORG_LOCATION_NOT_AVAILABLE": "WnB nie udostępnia jeszcze lokalizacji",
   "ORG_LOCATION_TEMPORARILY_UNAVAILABLE": "WnB chwilowo nie przesyła pozycji",
   "TITLE_NEXT_ROUTE": "Najbliższa planowana trasa: {title} – {distance}",

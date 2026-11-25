@@ -1058,7 +1058,7 @@ function renderLive() {
   orgMarker.setLatLng(ll); tailCase.setLatLngs(pts); tail.setLatLngs(pts);
   orgMarker.setStyle({ fillColor: lost ? COL.organizerLost : COL.organizer });
   orgMarker.setTooltipContent(text);
-  setPersistentStatus('live', bad || (lost ? fill(T.LOST) : null));
+  setPersistentStatus('live', bad);
   renderPageState();
 }
 

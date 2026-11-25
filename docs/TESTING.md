@@ -58,7 +58,7 @@ Szybkie sprawdzenie progów czasowych bez czekania: w `config.js` ustaw tymczaso
 | 1 ★ | Otwarcie strony: tytuł z długością, trasa, strzałki, start/meta, punkty POI; widać w czasie poniżej 5 s | ☐ | ☐ | ☐ |
 | 2 ★ | Zgoda na lokalizację: niebieska kropka, wiązka kierunku; odmowa: komunikat, mapa i trasa działają | ☐ | ☐ | ☐ |
 | 3 ★ | SYM: WnB jedzie, ogon, dymek z prędkością, przesuwanie bez odświeżania strony | ☐ | ☐ | ☐ |
-| 4 | SYM z postojem: „Postój", „Prawdopodobny postój", „Brak sygnału"; po 15 min znacznik znika bez statusu „Udostępnianie zakończone" (progi skrócone) | ☐ | ☐ | ☐ |
+| 4 | SYM z postojem: „Postój", „Prawdopodobny postój"; po 8 min szary znacznik i przycisk, wiek w dymku bez statusu; po 15 min znacznik znika (progi skrócone) | ☐ | ☐ | ☐ |
 | 5 | Brak danych od WnB: komunikat „Brak danych od WnB" przy świeżym pliku bez pozycji | ☐ | ☐ | ☐ |
 | 6 | Tryb samolotowy 20 s: komunikat o braku połączenia po drugim błędzie, powrót sieci znosi komunikat | ☐ | ☐ | ☐ |
 | 7 | POI i ETA (SYM z postojem na punkcie): ETA, „WnB jest tutaj", ETA do kolejnego po odjeździe, ETA do mety | ☐ | ☐ | ☐ |

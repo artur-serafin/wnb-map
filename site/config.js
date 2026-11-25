@@ -70,7 +70,7 @@ const CONFIG = {
   FRESH_SECONDS: 15,                // do tylu s dymek pokazuje tylko prędkość;
                                     // powyżej dodaje "X sekund temu"
   STOP_AFTER_SECONDS: 90,           // tyle s bez nowych danych (gdy WnB jechał) = "Prawdopodobny postój"
-  LOST_AFTER_SECONDS: 480,          // tyle s bez danych = "Brak sygnału" (znacznik szary, ramka u góry); 480 = 8 min
+  LOST_AFTER_SECONDS: 480,          // tyle s bez danych znacznik i przycisk WnB są szare; 480 = 8 min
   END_AFTER_SECONDS: 900,           // tyle s bez danych znacznik znika; 900 = 15 min
   STILL_SPEED_KMH: 2,               // poniżej tej prędkości (albo gdy brak prędkości) = "Postój"
 

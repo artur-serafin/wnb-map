@@ -1,7 +1,6 @@
 {
   "NO_DATA": "No data from {name}",
   "NO_CONNECTION": "No connection to the server",
-  "LOST": "No signal from {name}",
   "ORG_LOCATION_NOT_AVAILABLE": "WnB is not sharing its location yet",
   "ORG_LOCATION_TEMPORARILY_UNAVAILABLE": "WnB is temporarily not transmitting its position",
   "TITLE_NEXT_ROUTE": "Next planned route: {title} – {distance}",
