@@ -70,7 +70,7 @@ const CONFIG = {
   FRESH_SECONDS: 15,                // do tylu s dymek pokazuje tylko prędkość;
                                     // powyżej dodaje "X sekund temu"
   STOP_AFTER_SECONDS: 90,           // tyle s bez nowych danych (gdy WnB jechał) = "Prawdopodobny postój"
-  LOST_AFTER_SECONDS: 480,          // tyle s bez danych znacznik i przycisk WnB są szare; 480 = 8 min
+  LOST_AFTER_SECONDS: 480,          // tyle s bez danych szarzeją znacznik i kropka przycisku WnB; 480 = 8 min
   END_AFTER_SECONDS: 900,           // tyle s bez danych znacznik znika; 900 = 15 min
   STILL_SPEED_KMH: 2,               // poniżej tej prędkości (albo gdy brak prędkości) = "Postój"
 
@@ -94,7 +94,7 @@ const CONFIG = {
     route: '#d1495b',               // linia trasy
     start: '#2a9d8f',               // punkt startu
     organizer: '#ffb703',           // znacznik WnB i jego ogon
-    organizerLost: '#9a9a9a',       // znacznik WnB przy braku sygnału
+    organizerLost: '#9a9a9a',       // znacznik WnB i kropka przycisku przy braku sygnału
     outline: '#14213d',             // ciemny obrys znacznika i ogona
     me: '#1d6fdc',                   // pozycja Uczestnika
 	arrow: '#8f1d2c'                // strzałki kierunku jazdy na trasie

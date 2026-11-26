@@ -85,6 +85,6 @@ Format: data – decyzja – powód – rozważane alternatywy
   konfigurowalne; wariant zimowy tekstu przełącza ustawienie w `config.js`, ponieważ
   pliki językowe są JSON-em i nie mogą zawierać zakomentowanych wpisów.
 - 2026-11-25 – Po przekroczeniu `LOST_AFTER_SECONDS` nie wyświetla się stały status
-  „Brak sygnału od WnB”. Wystarczą wyszarzony przycisk, szary znacznik oraz wiek pozycji
+  „Brak sygnału od WnB”. Wystarczą szara kropka przycisku, szary znacznik oraz wiek pozycji
   w dymku; kliknięcie przycisku nadal pokazuje status tymczasowy. Próg i logika LOST/END
   pozostają bez zmian.

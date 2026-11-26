@@ -95,7 +95,7 @@ Sekrety przechowuj w menedżerze haseł. To jedyne zabezpieczenie: kto zna adres
 | „17 km/h, 35 s temu" | ostatnia pozycja ma kilkanaście sekund |
 | „Postój" | ostatnia pozycja pokazuje, że stoi |
 | „Prawdopodobny postój, 2 min temu" | brak nowych danych od ponad 90 s, choć jechał (np. światła) |
-| szary znacznik i przycisk WnB; wiek pozycji w dymku | brak danych ponad 8 minut; brak stałego statusu (kliknięcie przycisku pokazuje tymczasowy komunikat) |
+| szary znacznik i szara kropka przycisku WnB; wiek pozycji w dymku | brak danych ponad 8 minut; przycisk zachowuje zwykły wygląd, centruje ostatnią pozycję i pokazuje tymczasowy komunikat |
 | „Udostępnianie pozycji zakończone" | brak danych ponad 15 minut |
 
 - **Etykiety przy punktach i mecie:** „ETA ~38 min" (orientacyjnie, prędkość z ostatnich 2 minut), „WnB jest tutaj" (stoi przy punkcie), „WnB stoi" (stoi poza punktem). ETA do kolejnego punktu pojawia się dopiero, gdy WnB odjedzie od poprzedniego.
@@ -155,7 +155,7 @@ Wszystkie ustawienia mają komentarze w pliku. Najczęściej zmieniane:
 | Ustawienie | Domyślnie | Co zmienia |
 |---|---|---|
 | `STOP_AFTER_SECONDS` | 90 | po ilu sekundach bez danych pokazać „Prawdopodobny postój" |
-| `LOST_AFTER_SECONDS` | 480 | po ilu sekundach znacznik i przycisk WnB szarzeją |
+| `LOST_AFTER_SECONDS` | 480 | po ilu sekundach znacznik i kropka przycisku WnB szarzeją |
 | `END_AFTER_SECONDS` | 900 | po ilu sekundach znacznik WnB znika (bez osobnego statusu „zakończone") |
 | `STATUS_FADE_MS` | 250 | czas fade-in/fade-out statusów (ms) |
 | `STATUS_TEMPORARY_MS` | 2000 | czas widoczności statusów tymczasowych (ms) |

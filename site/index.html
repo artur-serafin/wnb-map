@@ -52,7 +52,7 @@ if (window.location.protocol === 'http:') {
   #idleNotice p:first-child { font-weight: 700; }
   .fabs { position: absolute; right: calc(12px + env(safe-area-inset-right, 0px)); bottom: calc(12px + env(safe-area-inset-bottom, 0px)); z-index: 1000; display: flex; flex-direction: column; gap: 8px; }
   .fab { width: 44px; height: 44px; padding: 0; display: grid; place-items: center; border: 0; border-radius: 10px; background: rgba(255,255,255,.95); color: #14213d; box-shadow: 0 1px 6px rgba(0,0,0,.35); }
-  .fab.isUnavailable { opacity: .48; filter: grayscale(1); }
+  #btnOrg.noLocation #orgIcon { stroke-width: 1.5px; stroke-dasharray: 1 3; stroke-linecap: round; }
   .gap { height: 8px; }
   .fab[hidden] { display: none; }
   /* ---------- menu pełnoekranowe ---------- */
@@ -429,9 +429,14 @@ function renderPageState() {
     title.textContent = C.NO_ROUTE_TITLE || '';
   }
   $('idleNotice').hidden = routeState !== 'none' || hasLocation || document.body.classList.contains('editMode');
-  const lost = hasLocation && orgLocationAge() > C.LOST_AFTER_SECONDS;
-  const unavailable = !hasLocation || lost;
-  $('btnOrg').classList.toggle('isUnavailable', unavailable);
+  const hasSignal = hasLocation && orgLocationAge() <= C.LOST_AFTER_SECONDS;
+  const orgButton = $('btnOrg');
+  orgButton.classList.toggle('noLocation', !hasLocation);
+  const orgIcon = $('orgIcon');
+  orgIcon.style.fill = hasSignal
+    ? (COL.organizer || '#ffb703')
+    : (COL.organizerLost || '#9a9a9a');
+  orgIcon.style.stroke = COL.outline;
 }
 
 function orgLocationAge() {
@@ -1327,8 +1332,14 @@ $('btnOut').onclick = () => map.zoomOut();
 $('btnFit').onclick = () => { if (routeBounds) map.fitBounds(routeBounds, { padding: [C.FIT_PADDING, C.FIT_PADDING] }); };
 $('btnOrg').onclick = () => {
   if (!orgMarker) showTemporaryStatus(T.ORG_LOCATION_NOT_AVAILABLE || '');
-  else if (orgLocationAge() > C.LOST_AFTER_SECONDS) showTemporaryStatus(T.ORG_LOCATION_TEMPORARILY_UNAVAILABLE || '');
-  else focus(orgMarker.getLatLng());
+  else {
+    const age = orgLocationAge();
+    if (age > C.END_AFTER_SECONDS) showTemporaryStatus(T.ORG_LOCATION_NOT_AVAILABLE || '');
+    else {
+      if (age > C.LOST_AFTER_SECONDS) showTemporaryStatus(T.ORG_LOCATION_TEMPORARILY_UNAVAILABLE || '');
+      focus(orgMarker.getLatLng());
+    }
+  }
 };
 $('btnMe').onclick = () => { startCompass(); if (meMarker) focus(meMarker.getLatLng()); else startLocating(); };
 
