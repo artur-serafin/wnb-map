@@ -31,12 +31,22 @@ Sekrety przechowuj w menedżerze haseł. To jedyne zabezpieczenie: kto zna adres
 ├── data/*.prev                    poprzednia wersja każdego pliku (zablokowane z internetu)
 ├── gpx-history/*.gpx              zarchiwizowane trasy (dostępne pod publicznymi URL-ami)
 ├── gpx-history/routes.json         indeks z tytułem, nazwą pliku i długością tras
+├── gpx-history/generate-routes-<SEKRET>.php  jednorazowy generator indeksu (usuń po użyciu)
 ├── live/latest.json               bieżąca pozycja WnB (zapisuje ingest)
 ├── ingest-<SEKRET>.php            odbiór pozycji z Traccar Client
 ├── upload-<SEKRET>.php            wgrywanie i usuwanie trasy
 ├── update-<SEKRET>.php            weryfikacja i zapis POI w trybie edycji
 └── .htaccess                      zabezpieczenia (brak listingu katalogów, blokada .lock/.tmp/.log/.prev)
 ```
+
+### 2.1 Pierwsze utworzenie `routes.json`
+
+1. Wgraj wszystkie pliki GPX bezpośrednio do `gpx-history/`.
+2. Wgraj wzorzec `generate-routes-ZMIEN-MNIE.php` do tego folderu i **zmień jego nazwę** na `generate-routes-<LOSOWY_SEKRET>.php`. Użyj innego sekretu niż dla pozostałych skryptów (PowerShell: `[guid]::NewGuid().ToString('N')`).
+3. Otwórz przez HTTPS adres skryptu i naciśnij „Wygeneruj routes.json”. Samo otwarcie strony niczego nie zapisuje.
+4. Po powodzeniu sprawdź liczbę tras i usuń skrypt z serwera.
+
+Generator przegląda pliki `.gpx` tylko w tym folderze, zapisuje nazwę pliku, tytuł pierwszego śladu i długość zaokrągloną do 0,1 km. Weryfikuje GPX przed zapisem; jeśli choć jeden plik jest niepoprawny, pokazuje listę błędów i pozostawia dotychczasowy `routes.json` bez zmian. Udane generowanie atomowo zastępuje indeks.
 
 ## 3. Przed przejazdem
 

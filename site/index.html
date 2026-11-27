@@ -50,6 +50,36 @@ if (window.location.protocol === 'http:') {
   #idleNotice { position: absolute; z-index: 850; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(calc(100% - 40px), 480px); box-sizing: border-box; padding: 1rem 1.2rem; border: 1px solid rgba(255,255,255,.2); border-radius: 16px; background: rgba(20,33,61,.82); color: #fff; text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,.2); pointer-events: none; }
   #idleNotice p { margin: .35rem 0; }
   #idleNotice p:first-child { font-weight: 700; }
+  #idleHistoryLink { display: inline-block; margin-top: .55rem; color: #ffcf52; font-weight: 700; pointer-events: auto; }
+  .historyView { position: absolute; inset: 0; z-index: 1100; overflow-y: auto; -webkit-overflow-scrolling: touch; background: rgba(20,33,61,.62); color: #fff; }
+  .historyView[hidden] { display: none; }
+  .historyPanel { box-sizing: border-box; width: min(100%, 760px); min-height: 100%; margin: 0 auto; padding: .8rem 1rem calc(1.25rem + env(safe-area-inset-bottom, 0px)); background: rgba(20,33,61,.18); }
+  .historyNav { position: sticky; top: -.8rem; z-index: 1; display: flex; justify-content: space-between; gap: .75rem; margin: -.8rem -1rem 1rem; padding: .7rem 1rem; background: rgba(14,24,48,.96); border-bottom: 1px solid rgba(255,255,255,.14); }
+  .historyNav a { color: #ffcf52; font-size: .9rem; font-weight: 700; text-decoration: none; }
+  .historyNav a[hidden] { display: none; }
+  .historyHeading { margin: .5rem 0 .35rem; font-size: 1.1rem; }
+  .historyDescription { margin: 0 0 .9rem; color: rgba(255,255,255,.78); font-size: .9rem; }
+  .historySearch { width: 100%; box-sizing: border-box; margin: 0 0 .8rem; padding: .7rem .8rem; border: 1px solid rgba(255,255,255,.38); border-radius: 10px; background: rgba(255,255,255,.96); color: #14213d; font: inherit; }
+  .historyList { display: grid; gap: .5rem; }
+  .historyRouteLink { display: flex; align-items: center; gap: .8rem; padding: .75rem .85rem; border: 1px solid rgba(255,255,255,.16); border-radius: 12px; background: rgba(255,255,255,.09); color: #fff; text-decoration: none; }
+  .historyRouteLink:active { background: rgba(255,255,255,.18); }
+  .historyRouteLink:focus-visible, .historyNav a:focus-visible { outline: 3px solid #ffb703; outline-offset: 2px; }
+  .historyRouteTitle { flex: 1; min-width: 0; font-weight: 650; }
+  .historyRouteDistance { flex: none; color: rgba(255,255,255,.78); font-size: .9rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .historyRouteGo { flex: none; width: 18px; height: 18px; fill: none; stroke: rgba(255,255,255,.65); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .historyMessage { padding: .8rem; border-radius: 10px; background: rgba(255,255,255,.09); color: rgba(255,255,255,.88); }
+  body.historyMode #notes, body.historyMode #idleNotice, body.historyMode #glowLayer, body.historyMode #poiEditor { display: none !important; }
+  body.historyListMode .fabs { display: none; }
+  body.historyMode:not(.historyListMode) #btnOrg { display: none; }
+  body.historyListMode .leaflet-control-container { z-index: 1200; }
+  body.historyMode:not(.historyListMode) #historyView { z-index: 900; overflow: visible; background: transparent; pointer-events: none; }
+  body.historyMode:not(.historyListMode) .historyPanel { min-height: 0; background: transparent; pointer-events: none; }
+  body.historyMode:not(.historyListMode) .historyNav, body.historyMode:not(.historyListMode) .historyMessage { pointer-events: auto; }
+  @media (min-width: 760px) {
+    .historyPanel { min-height: calc(100% - 2rem); margin: 1rem auto; border: 1px solid rgba(255,255,255,.15); border-radius: 16px; }
+    .historyNav { top: -0.8rem; }
+    body.historyMode:not(.historyListMode) .historyPanel { margin: 0 auto; border: 0; border-radius: 0; }
+  }
   .fabs { position: absolute; right: calc(12px + env(safe-area-inset-right, 0px)); bottom: calc(12px + env(safe-area-inset-bottom, 0px)); z-index: 1000; display: flex; flex-direction: column; gap: 8px; }
   .fab { width: 44px; height: 44px; padding: 0; display: grid; place-items: center; border: 0; border-radius: 10px; background: rgba(255,255,255,.95); color: #14213d; box-shadow: 0 1px 6px rgba(0,0,0,.35); }
   #btnOrg.noLocation #orgIcon { stroke-width: 1.5px; stroke-dasharray: 1 3; stroke-linecap: round; }
@@ -73,6 +103,12 @@ if (window.location.protocol === 'http:') {
   .about { margin: 0; font-size: 1.08rem; line-height: 1.55; }
   .linkCard { display: flex; align-items: center; gap: .85rem; padding: .85rem .9rem; margin-bottom: .6rem; border-radius: 16px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); color: #fff; text-decoration: none; }
   a.linkCard:active { background: rgba(255,255,255,.16); }
+  .historyMenuLink { display: flex; align-items: center; gap: .6rem; margin-top: 1.1rem; padding: .75rem 0 .2rem; border-top: 1px solid rgba(255,255,255,.14); color: rgba(255,255,255,.86); text-decoration: none; }
+  .historyMenuLink:focus-visible { outline: 3px solid #ffb703; outline-offset: 3px; }
+  .historyMenuLinkText { flex: 1; min-width: 0; font-size: .88rem; line-height: 1.4; }
+  .historyMenuLinkText b { display: block; margin-bottom: .1rem; font-size: .94rem; font-weight: 600; }
+  .historyMenuLinkText span { color: rgba(255,255,255,.64); font-size: .82rem; }
+  .historyMenuLink .linkGo { width: 16px; height: 16px; stroke: rgba(255,255,255,.45); }
   .linkIcon { flex: none; width: 44px; height: 44px; display: block; }
   .linkText { flex: 1; min-width: 0; font-size: .95rem; line-height: 1.35; }
   .linkText b { display: block; margin-bottom: .1rem; font-size: 1rem; }
@@ -147,6 +183,7 @@ if (window.location.protocol === 'http:') {
   <div id="notes" aria-live="polite" aria-atomic="false"></div>
   <div id="idleNotice" hidden aria-live="polite">
     <p id="idleNoticeIntro"></p><p id="idleNoticeDetails"></p><p id="idleNoticeStart"></p>
+    <a id="idleHistoryLink" href="?history=list"></a>
   </div>
   <div class="fabs">
     <button class="fab" id="btnIn"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
@@ -165,6 +202,10 @@ if (window.location.protocol === 'http:') {
       </div>
       <div class="menuBody" id="menuBody"><div class="menuInner">
         <p class="about" id="aboutText"></p>
+        <a class="historyMenuLink" id="lnkHistory" href="?history=list">
+          <span class="historyMenuLinkText"><b id="historyMenuTitle"></b><span id="historyMenuDescription"></span></span>
+          <svg class="linkGo" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+        </a>
         <h2 id="hLinks"></h2>
         <a class="linkCard" id="lnkMessenger" target="_blank" rel="noopener noreferrer">
           <img class="linkIcon" src="messenger.svg" alt="" aria-hidden="true">
@@ -200,6 +241,15 @@ if (window.location.protocol === 'http:') {
     <button class="delete" id="poiDelete" type="button"></button>
     <div id="editStatus" aria-live="polite"></div>
   </div>
+  <div class="historyView" id="historyView" hidden>
+    <section class="historyPanel" id="historyPanel" aria-label="Route history">
+      <nav class="historyNav" id="historyNav" aria-label="History navigation">
+        <a id="historyBack" href="?history=list" hidden></a>
+        <a id="historyExit" href="./"></a>
+      </nav>
+      <div id="historyContent"></div>
+    </section>
+  </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
@@ -207,7 +257,15 @@ if (window.location.protocol === 'http:') {
 <script>
 const C = CONFIG, COL = C.COLORS;
 const $ = id => document.getElementById(id);
+const pageParams = new URLSearchParams(window.location.search);
+const historyMode = pageParams.has('history');
+const historyListMode = historyMode && pageParams.get('history') === 'list';
+const historyFile = historyMode && !historyListMode ? pageParams.get('history') : null;
+document.body.classList.toggle('historyMode', historyMode);
+document.body.classList.toggle('historyListMode', historyListMode);
 let T = {}, lang = null;
+let historyEntry = null;
+let historyRoutesCache = null;
 const fill = s => (s || '').replace('{name}', C.ORGANIZER_NAME);
 const statusItems = new Map();
 const STATUS_FADE_MS = Math.max(0, Number(C.STATUS_FADE_MS) || 0);
@@ -317,7 +375,23 @@ function applyTexts() {
   $('idleNoticeIntro').textContent = T.IDLE_NOTICE_INTRO || '';
   $('idleNoticeDetails').textContent = C.IDLE_USE_SEASONAL_NOTICE ? (T.IDLE_NOTICE_SEASONAL || '') : (T.IDLE_NOTICE_STANDARD || '');
   $('idleNoticeStart').textContent = T.IDLE_NOTICE_START || '';
+  $('idleHistoryLink').textContent = T.HISTORY_CTA || '';
+  $('historyMenuTitle').textContent = T.HISTORY_MENU_TITLE || T.HISTORY_CTA || '';
+  $('historyMenuDescription').textContent = T.HISTORY_MENU_DESCRIPTION || '';
+  $('historyExit').textContent = T.HISTORY_EXIT || '';
+  $('historyBack').textContent = T.HISTORY_BACK || '';
+  $('historyView').setAttribute('aria-label', T.HISTORY_ARIA_LABEL || '');
+  $('historyPanel').setAttribute('aria-label', T.HISTORY_ARIA_LABEL || '');
+  $('historyNav').setAttribute('aria-label', T.HISTORY_NAV_ARIA_LABEL || '');
+  $('idleHistoryLink').href = historyUrl('list');
+  $('lnkHistory').href = historyUrl('list');
+  $('historyExit').href = homeUrl();
   refreshSfLabels(); renderGeo(); renderLive(); renderPageState(); renderEta();
+  if (historyListMode && historyRoutesCache) {
+    const scrollTop = $('historyView').scrollTop;
+    renderHistoryList(historyRoutesCache);
+    $('historyView').scrollTop = scrollTop;
+  }
 }
 
 // ---------- menu (pełny ekran) ----------
@@ -414,6 +488,18 @@ const focus = ll => map.setView(ll, Math.max(map.getZoom(), C.FOCUS_ZOOM));
 
 function renderPageState() {
   if (!lang) return;
+  if (historyMode) {
+    const historyTitle = historyListMode
+      ? (T.HISTORY_TITLE || 'WnB – Zobacz poprzednie trasy')
+      : (historyEntry ? historyEntry.title : (T.HISTORY_LOADING || ''));
+    $('title').textContent = historyTitle;
+    document.title = historyTitle;
+    $('idleNotice').hidden = true;
+    $('btnOrg').hidden = true;
+    $('btnFit').hidden = historyListMode || routeState !== 'available';
+    $('btnMe').hidden = historyListMode;
+    return;
+  }
   const hasRoute = routeState === 'available';
   const hasLocation = !!orgMarker;
   const title = $('title');
@@ -459,24 +545,30 @@ function fmtAgo(s) {
 }
 
 // ---------- trasa ----------
-async function noRoute() {   // przejazd bez trasy: pokazujemy mapę i POI, bez ETA i kilometra trasy
+async function noRoute(historical) {   // przejazd bez trasy: pokazujemy mapę i POI, bez ETA i kilometra trasy
   routeState = 'none';
   routeTitle = C.NO_ROUTE_TITLE || '';
   if (routeTitle) document.title = routeTitle;
   $('btnFit').hidden = true;   // przycisk "Cała trasa" nie ma wtedy sensu
-  await loadPoi();
+  if (!historical) await loadPoi();
   renderPageState();
 }
-async function loadRoute() {
+async function loadRoute(url, historicalEntry) {
+  const historical = !!historicalEntry;
+  url = url || C.GPX_URL;
   try {
-    const res = await fetch(C.GPX_URL, { cache: 'no-cache' });
-    if (res.status === 404) { await noRoute(); return; }   // brak trasy to stan celowy: POI mogą działać, bez ETA
+    const res = await fetch(url, { cache: 'no-cache' });
+    if (res.status === 404) {
+      await noRoute(historical);
+      if (historical) renderHistoryMessage(T.HISTORY_ROUTE_ERROR || '');
+      return;
+    }   // brak trasy to stan celowy: POI mogą działać, bez ETA
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const xml = new DOMParser().parseFromString(await res.text(), 'application/xml');
     const trk = xml.getElementsByTagName('trk')[0];
     if (xml.getElementsByTagName('parsererror').length || !trk) throw new Error('GPX');
     const nameEl = trk.getElementsByTagName('name')[0];
-    const name = (nameEl && nameEl.textContent.trim()) || C.GPX_URL.split('/').pop();
+    const name = (historicalEntry && historicalEntry.title) || (nameEl && nameEl.textContent.trim()) || url.split('/').pop();
     const pts = [];
     for (const p of trk.getElementsByTagName('trkpt')) {
       const ll = [parseFloat(p.getAttribute('lat')), parseFloat(p.getAttribute('lon'))], last = pts[pts.length - 1];
@@ -494,11 +586,181 @@ async function loadRoute() {
     addStartFinish(pts);
     routeBounds = line.getBounds();
     map.fitBounds(routeBounds, { padding: [C.FIT_PADDING, C.FIT_PADDING] });
-    prepRoute(); drawArrows(); updateFar(); await loadPoi(); updateProgress(); renderEta();
+    prepRoute(); drawArrows(); updateFar();
+    if (!historical) await loadPoi();
+    updateProgress(); renderEta();
     document.title = name;
     renderPageState();
   } catch (e) {
     routeState = 'error'; renderPageState();
+    if (historical) {
+      console.error('history route', e);
+      renderHistoryMessage(T.HISTORY_ROUTE_ERROR || '');
+    }
+  }
+}
+
+function historyUrl(value, query) {
+  const url = new URL(window.location.href);
+  url.searchParams.set('history', value);
+  url.searchParams.delete('s');
+  if (query) url.searchParams.set('q', query);
+  else url.searchParams.delete('q');
+  return url.pathname + url.search + url.hash;
+}
+function homeUrl() {
+  const url = new URL(window.location.href);
+  url.searchParams.delete('history');
+  url.searchParams.delete('q');
+  return url.pathname + url.search + url.hash;
+}
+function renderHistoryMessage(text) {
+  const content = $('historyContent');
+  content.textContent = '';
+  const message = document.createElement('p');
+  message.className = 'historyMessage';
+  message.setAttribute('role', 'status');
+  message.textContent = text;
+  content.appendChild(message);
+}
+async function fetchHistoryRoutes() {
+  const response = await fetch('gpx-history/routes.json', { cache: 'no-cache' });
+  if (!response.ok) throw new Error('HTTP ' + response.status);
+  const routes = await response.json();
+  if (!Array.isArray(routes)) throw new Error('Invalid route index');
+  const files = new Set();
+  return routes.map(route => {
+    if (!route || typeof route.file !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9._-]*\.gpx$/.test(route.file) ||
+        typeof route.title !== 'string' || !route.title.trim() ||
+        typeof route.distanceKm !== 'number' || !Number.isFinite(route.distanceKm) || route.distanceKm < 0 ||
+        files.has(route.file)) throw new Error('Invalid route entry');
+    files.add(route.file);
+    return { file: route.file, title: route.title.trim(), distanceKm: route.distanceKm };
+  });
+}
+function saveHistoryScroll(query) {
+  try {
+    sessionStorage.setItem('wnb-history-scroll', JSON.stringify({ query, top: $('historyView').scrollTop }));
+  } catch (e) {}
+}
+function restoreHistoryScroll(query) {
+  try {
+    const saved = sessionStorage.getItem('wnb-history-scroll');
+    sessionStorage.removeItem('wnb-history-scroll');
+    if (!saved) return;
+    const state = JSON.parse(saved);
+    if (state.query === query && Number.isFinite(state.top)) $('historyView').scrollTop = state.top;
+  } catch (e) {}
+}
+function renderHistoryList(routes) {
+  const content = $('historyContent');
+  content.textContent = '';
+  const heading = document.createElement('h2');
+  heading.className = 'historyHeading';
+  heading.textContent = T.HISTORY_TITLE || '';
+  const description = document.createElement('p');
+  description.className = 'historyDescription';
+  description.textContent = T.HISTORY_DESCRIPTION || '';
+  const search = document.createElement('input');
+  search.className = 'historySearch';
+  search.type = 'search';
+  search.setAttribute('aria-label', T.HISTORY_SEARCH_LABEL || '');
+  search.placeholder = T.HISTORY_SEARCH_PLACEHOLDER || '';
+  search.value = new URLSearchParams(window.location.search).get('q') || '';
+  const list = document.createElement('div');
+  list.className = 'historyList';
+  list.setAttribute('role', 'list');
+  const message = document.createElement('p');
+  message.className = 'historyMessage';
+  message.setAttribute('role', 'status');
+  message.setAttribute('aria-live', 'polite');
+  message.hidden = true;
+  content.append(heading, description, search, list, message);
+
+  const collator = new Intl.Collator('pl', { numeric: true, sensitivity: 'base' });
+  const sorted = routes.slice().sort((a, b) => collator.compare(b.file, a.file));
+  function drawRows() {
+    const query = search.value.trim().toLocaleLowerCase(lang || 'pl');
+    const filtered = sorted.filter(route => route.title.toLocaleLowerCase(lang || 'pl').includes(query));
+    list.textContent = '';
+    message.hidden = filtered.length !== 0;
+    message.textContent = routes.length ? (T.HISTORY_NO_MATCH || '') : (T.HISTORY_EMPTY || '');
+    filtered.forEach(route => {
+      const link = document.createElement('a');
+      link.className = 'historyRouteLink';
+      link.setAttribute('role', 'listitem');
+      link.href = historyUrl(route.file, search.value.trim());
+      const title = document.createElement('span');
+      title.className = 'historyRouteTitle';
+      title.textContent = route.title;
+      const distance = document.createElement('span');
+      distance.className = 'historyRouteDistance';
+      distance.textContent = route.distanceKm.toLocaleString(lang || 'pl', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' km';
+      const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      arrow.setAttribute('class', 'historyRouteGo');
+      arrow.setAttribute('viewBox', '0 0 24 24');
+      arrow.setAttribute('aria-hidden', 'true');
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', 'M9 5l7 7-7 7');
+      arrow.appendChild(path);
+      link.append(title, distance, arrow);
+      link.addEventListener('click', () => saveHistoryScroll(search.value.trim()));
+      list.appendChild(link);
+    });
+    const url = new URL(window.location.href);
+    if (search.value.trim()) url.searchParams.set('q', search.value.trim());
+    else url.searchParams.delete('q');
+    window.history.replaceState(null, '', url.pathname + url.search + url.hash);
+  }
+  search.addEventListener('input', () => {
+    $('historyView').scrollTop = 0;
+    drawRows();
+  });
+  drawRows();
+  restoreHistoryScroll(search.value.trim());
+}
+async function showHistoryList() {
+  $('historyView').hidden = false;
+  $('historyBack').hidden = true;
+  renderPageState();
+  try {
+    historyRoutesCache = await fetchHistoryRoutes();
+    renderHistoryList(historyRoutesCache);
+  } catch (e) {
+    console.error('history index', e);
+    renderHistoryMessage(T.HISTORY_LOAD_ERROR || '');
+  }
+}
+async function showHistoryRoute() {
+  $('historyView').hidden = false;
+  $('historyBack').hidden = false;
+  $('historyBack').href = historyUrl('list', new URLSearchParams(window.location.search).get('q') || '');
+  renderPageState();
+  if (!historyFile || !/^[A-Za-z0-9][A-Za-z0-9._-]*\.gpx$/.test(historyFile)) {
+    const text = T.HISTORY_ROUTE_NOT_FOUND || '';
+    renderHistoryMessage(text);
+    $('title').textContent = text;
+    document.title = text;
+    return;
+  }
+  try {
+    const routes = await fetchHistoryRoutes();
+    historyEntry = routes.find(route => route.file === historyFile) || null;
+    if (!historyEntry) {
+      const text = T.HISTORY_ROUTE_NOT_FOUND || '';
+      renderHistoryMessage(text);
+      $('title').textContent = text;
+      document.title = text;
+      return;
+    }
+    renderPageState();
+    await loadRoute('gpx-history/' + encodeURIComponent(historyEntry.file), historyEntry);
+  } catch (e) {
+    console.error('history route index', e);
+    const text = T.HISTORY_LOAD_ERROR || '';
+    renderHistoryMessage(text);
+    $('title').textContent = text;
+    document.title = text;
   }
 }
 
@@ -1358,6 +1620,18 @@ function showSplash() {
 (async function start() {
   showSplash();
   await setLang(pickLang(), false);   // najpierw teksty, potem reszta
+  if (historyMode) {
+    $('historyView').hidden = false;
+    if (historyListMode) await showHistoryList();
+    else {
+      await showHistoryRoute();
+      if (historyEntry) {
+        startLocating();
+        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission !== 'function') startCompass();
+      }
+    }
+    return;
+  }
   await loadRoute(); pollLive(); startLocating();
   const secret = new URLSearchParams(window.location.search).get('s');
   if (secret) verifyEditSecret(secret);

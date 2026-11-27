@@ -123,3 +123,15 @@ Android i komputer, zachowanie w tle na iPhonie przez pełne 3 godziny, kierunek
 | H13 | POI jest widoczny przy 404 GPX; bez trasy brak fit i ETA | ☐ | ☐ | ☐ |
 | H14 | Jeden POI bez `km` wyłącza ETA dla wszystkich POI i mety; po uzupełnieniu km ETA wraca | ☐ | ☐ | ☐ |
 | H15 | Upload samych POI nie usuwa GPX; upload samego GPX usuwa stare POI; delete usuwa oba pliki i nie zwraca błędu przy braku jednego pliku | ☐ | ☐ | ☐ |
+
+## 7. Testy akceptacyjne historii tras
+
+| # | Scenariusz | iPhone | Android | Komputer |
+|---|---|---|---|---|
+| R1 | Link z planszy bez zaplanowanej trasy i link w menu otwierają listę historii | ☐ | ☐ | ☐ |
+| R2 | Lista jest sortowana malejąco według nazwy pliku, pokazuje tytuł i długość, a wyszukiwanie od razu filtruje wyniki | ☐ | ☐ | ☐ |
+| R3 | Lista nie pokazuje bieżącej trasy, WnB, POI, lokalizacji Użytkownika ani narzędzi mapy; atrybucja mapy pozostaje widoczna | ☐ | ☐ | ☐ |
+| R4 | Własny URL trasy otwiera jej GPX bezpośrednio; podgląd nie pobiera bieżącej trasy, POI ani pozycji WnB | ☐ | ☐ | ☐ |
+| R5 | Podgląd pokazuje zoom, dopasowanie trasy i lokalizację Użytkownika, ale nie przycisk WnB | ☐ | ☐ | ☐ |
+| R6 | Powrót z podglądu zachowuje wyszukiwanie i pozycję listy; zamknięcie historii przywraca normalny widok | ☐ | ☐ | ☐ |
+| R7 | Linki i etykiety historii działają w PL i EN; nieznany URL lub błąd pobrania pokazuje komunikat | ☐ | ☐ | ☐ |
