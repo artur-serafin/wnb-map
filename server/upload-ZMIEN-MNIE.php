@@ -1,5 +1,5 @@
 <?php
-// upload: wgrywanie i usuwanie trasy (data/WnB.gpx) oraz punktów POI (data/poi.json).
+// upload: wgrywanie, usuwanie i archiwizowanie trasy oraz punktów POI.
 //
 // SEKRET: nazwa tego pliku na serwerze (zamień "ZMIEN-MNIE" na własny losowy ciąg, min. 24 znaki,
 // inny niż w pliku ingest). Prawdziwa nazwa NIE może trafić do repozytorium.
@@ -8,6 +8,8 @@
 const DATA_DIR      = __DIR__ . '/data';
 const GPX_NAME      = 'WnB.gpx';
 const POI_NAME      = 'poi.json';
+const HISTORY_DIR   = __DIR__ . '/gpx-history';
+const HISTORY_INDEX = HISTORY_DIR . '/routes.json';
 const MAX_GPX_BYTES = 2000000;           // maksymalny rozmiar pliku GPX
 const MAX_POI_BYTES = 200000;            // maksymalny rozmiar pliku poi.json
 const MAX_POINTS    = 5000;              // maksymalna liczba punktów trasy
@@ -141,6 +143,88 @@ function removeFile(string $name): bool {   // "usunięcie" = przeniesienie do .
     return rename($target, $target . '.prev');
 }
 
+function readHistoryRoutes(): array {
+    if (!is_file(HISTORY_INDEX)) return [];
+    $json = file_get_contents(HISTORY_INDEX);
+    if ($json === false) throw new RuntimeException('Nie można odczytać indeksu historii tras.');
+    $routes = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+    if (!is_array($routes) || !array_is_list($routes)) {
+        throw new RuntimeException('Indeks historii tras musi być listą JSON.');
+    }
+    foreach ($routes as $route) {
+        if (!is_array($route) || !isset($route['file']) || !is_string($route['file'])) {
+            throw new RuntimeException('Wpis w indeksie historii tras nie ma poprawnego pola file.');
+        }
+    }
+    return $routes;
+}
+
+function writeHistoryRoutes(array $routes): void {
+    $json = json_encode($routes, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR) . "\n";
+    $tmp = HISTORY_DIR . '/routes.' . bin2hex(random_bytes(8)) . '.tmp';
+    $written = file_put_contents($tmp, $json, LOCK_EX);
+    if ($written !== strlen($json)) {
+        @unlink($tmp);
+        throw new RuntimeException('Nie można zapisać indeksu historii tras.');
+    }
+    if (!rename($tmp, HISTORY_INDEX)) {
+        @unlink($tmp);
+        throw new RuntimeException('Nie można podmienić indeksu historii tras.');
+    }
+}
+
+function archiveCurrentRoute(): array {
+    $source = DATA_DIR . '/' . GPX_NAME;
+    if (!is_file($source)) throw new RuntimeException('Nie ma bieżącej trasy do przeniesienia.');
+
+    $content = file_get_contents($source);
+    if ($content === false) throw new RuntimeException('Nie można odczytać bieżącej trasy.');
+    $g = parseGpx($content);
+    if ($g['error'] !== null) throw new RuntimeException('Nie można przenieść trasy do historii: ' . $g['error']);
+
+    if (!is_dir(HISTORY_DIR) && !mkdir(HISTORY_DIR, 0755, true)) {
+        throw new RuntimeException('Nie można utworzyć folderu historii tras.');
+    }
+
+    $routes = readHistoryRoutes();
+    $base = 'route' . time();
+    $file = $base . '.gpx';
+    $suffix = 1;
+    while (file_exists(HISTORY_DIR . '/' . $file) || in_array($file, array_column($routes, 'file'), true)) {
+        $file = $base . '-' . $suffix . '.gpx';
+        $suffix++;
+    }
+
+    $destination = HISTORY_DIR . '/' . $file;
+    if (!@copy($source, $destination)) throw new RuntimeException('Nie udało się skopiować trasy do historii.');
+
+    $title = trim($g['title']) !== '' ? trim($g['title']) : '(bez nazwy)';
+    $routes[] = [
+        'file' => $file,
+        'title' => $title,
+        'distanceKm' => round($g['km'], 1)
+    ];
+    try {
+        writeHistoryRoutes($routes);
+    } catch (Throwable $e) {
+        if (!@unlink($destination)) {
+            throw new RuntimeException(
+                'Indeks nie został zapisany. Dodatkowa kopia GPX pozostała w historii jako ' .
+                $file . '. Szczegóły: ' . $e->getMessage(),
+                0,
+                $e
+            );
+        }
+        throw $e;
+    }
+
+    $currentRemoved = @unlink($source);
+    $poi = DATA_DIR . '/' . POI_NAME;
+    $poiExisted = is_file($poi);
+    $poiRemoved = $poiExisted && removeFile(POI_NAME);
+    return [$title, round($g['km'], 1), $file, $currentRemoved, $poiExisted, $poiRemoved];
+}
+
 // Wynik: ['none'] gdy pole nie zostało wypełnione, ['ok', treść] albo ['error', komunikat].
 function readUpload(string $field, int $maxBytes): array {
     $f = $_FILES[$field] ?? null;
@@ -176,6 +260,7 @@ function currentState(): string {
 }
 
 $ok = []; $err = []; $warn = [];
+$errHeading = 'Nic nie zostało zmienione';
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     $action = $_POST['action'] ?? '';
@@ -184,6 +269,18 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
             $a = removeFile(GPX_NAME);
             $b = removeFile(POI_NAME);
             $ok[] = ($a || $b) ? 'Usunięto trasę i punkty POI (poprzednie wersje zostały zachowane jako .prev).' : 'Nie było czego usuwać.';
+        } elseif ($action === 'archive') {
+            $errHeading = 'Nie udało się zakończyć archiwizacji';
+            [$title, $km, $file, $currentRemoved, $poiExisted, $poiRemoved] = archiveCurrentRoute();
+            $ok[] = 'Przeniesiono trasę do historii: ' . $title . ', ' . number_format($km, 1, ',', '') . ' km (' . $file . ').';
+            if (!$currentRemoved) {
+                $warn[] = 'Trasa jest w historii, ale nie udało się usunąć bieżącego pliku WnB.gpx.';
+            }
+            if ($poiExisted && $poiRemoved) {
+                $ok[] = 'Punkty POI usunięto (poprzednia wersja została zachowana jako .prev).';
+            } elseif ($poiExisted) {
+                $warn[] = 'Trasę przeniesiono, ale nie udało się usunąć punktów POI.';
+            }
         } elseif ($action === 'upload') {
             $gpx = readUpload('gpx', MAX_GPX_BYTES);
             $poi = readUpload('poi', MAX_POI_BYTES);
@@ -245,14 +342,16 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
   input[type=file] { width: 100%; font: inherit; }
   .hint { font-size: .85rem; opacity: .75; margin: .3rem 0; }
   button { width: 100%; font: inherit; font-weight: 700; padding: .8rem; border: 0; border-radius: 10px; background: #14213d; color: #fff; margin-top: 1rem; }
-  button.danger { background: #c0392b; }
+  .action-links { display: flex; flex-direction: column; align-items: center; gap: .25rem; margin: .5rem 0 1rem; }
+  .action-links form { margin: 0; }
+  .action-links button { width: auto; margin: 0; padding: .2rem .4rem; border-radius: 0; background: transparent; color: #596579; font-size: .9rem; font-weight: 400; text-decoration: underline; cursor: pointer; }
 </style>
 </head>
 <body>
 <h1>Trasa i punkty: wgrywanie</h1>
 <?php if ($ok): ?><div class="box ok"><ul><?php foreach ($ok as $m) echo '<li>' . h($m) . '</li>'; ?></ul></div><?php endif; ?>
 <?php if ($warn): ?><div class="box warn"><b>Uwaga</b><ul><?php foreach ($warn as $m) echo '<li>' . h($m) . '</li>'; ?></ul></div><?php endif; ?>
-<?php if ($err): ?><div class="box err"><b>Nic nie zostało zmienione</b><ul><?php foreach ($err as $m) echo '<li>' . h($m) . '</li>'; ?></ul></div><?php endif; ?>
+<?php if ($err): ?><div class="box err"><b><?php echo h($errHeading); ?></b><ul><?php foreach ($err as $m) echo '<li>' . h($m) . '</li>'; ?></ul></div><?php endif; ?>
 
 <div class="box"><b>Stan obecny</b><br><?php echo currentState(); ?></div>
 
@@ -266,9 +365,17 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
   <button type="submit">Wgraj</button>
 </form>
 
-<form method="post" onsubmit="return confirm('Usunąć trasę i punkty POI?');">
-  <input type="hidden" name="action" value="delete">
-  <button type="submit" class="danger">Usuń trasę i punkty</button>
-</form>
+<?php if (is_file(DATA_DIR . '/' . GPX_NAME)): ?>
+<div class="action-links">
+  <form method="post" onsubmit="return confirm('Usunąć trasę i punkty POI?');">
+    <input type="hidden" name="action" value="delete">
+    <button type="submit">Usuń trasę i punkty</button>
+  </form>
+  <form method="post" onsubmit="return confirm('Przenieść trasę do historii i usunąć punkty POI?');">
+    <input type="hidden" name="action" value="archive">
+    <button type="submit">Usuń i zapisz trasę do historii</button>
+  </form>
+</div>
+<?php endif; ?>
 </body>
 </html>

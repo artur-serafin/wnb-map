@@ -29,6 +29,8 @@ Sekrety przechowuj w menedżerze haseł. To jedyne zabezpieczenie: kto zna adres
 ├── lang/pl.json, en.json          teksty interfejsu
 ├── data/WnB.gpx, poi.json         bieżąca trasa i punkty (zmieniasz przez stronę upload)
 ├── data/*.prev                    poprzednia wersja każdego pliku (zablokowane z internetu)
+├── gpx-history/*.gpx              zarchiwizowane trasy (dostępne pod publicznymi URL-ami)
+├── gpx-history/routes.json         indeks z tytułem, nazwą pliku i długością tras
 ├── live/latest.json               bieżąca pozycja WnB (zapisuje ingest)
 ├── ingest-<SEKRET>.php            odbiór pozycji z Traccar Client
 ├── upload-<SEKRET>.php            wgrywanie i usuwanie trasy
@@ -114,7 +116,7 @@ Sekrety przechowuj w menedżerze haseł. To jedyne zabezpieczenie: kto zna adres
 ## 6. Po przejeździe
 
 - [ ] Wyłącz **Continuous tracking** w Traccar Client. Po 15 minutach strona sama pokaże „Udostępnianie pozycji zakończone".
-- [ ] Opcjonalnie usuń trasę przez stronę `upload` („Usuń trasę i punkty"). Poprzednie wersje zostaną jako `.prev`.
+- [ ] Opcjonalnie usuń trasę przez stronę `upload` („Usuń trasę i punkty"), zachowując pliki jako `.prev`, albo przenieś GPX do historii („Usuń i zapisz trasę do historii”). Obie opcje usuwają bieżące punkty POI, zachowując ich poprzednią wersję jako `.prev`.
 - [ ] Jeśli włączałeś zapis logu (`LOG_REQUESTS` w `ingest`), wyłącz go i usuń `log/requests.log`.
 
 ## 7. Przejazd bez trasy

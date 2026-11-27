@@ -14,6 +14,7 @@ dotarcia do kolejnych punktów.
 - przejazdy z trasą lub bez trasy,
 - tryb edycji POI aktywowany osobnym sekretem,
 - upload i usuwanie GPX oraz POI,
+- archiwizacja tras do plików GPX z indeksem JSON,
 - interfejs PL/EN i powiadomienia mobilne.
 - ekran startowy z logo, z konfigurowalnymi czasami pełnego widoku i zanikania.
 
@@ -25,6 +26,7 @@ site/
   config.js        konfiguracja i teksty ustawień
   lang/            tłumaczenia PL/EN
   data/            WnB.gpx i poi.json
+  gpx-history/     zarchiwizowane GPX i routes.json
 
 server/
   ingest-ZMIEN-MNIE.php
@@ -86,6 +88,9 @@ tryb edycji; zamknięcie całego trybu usuwa parametr `s` i przeładowuje stron�
 - sam POI zastępuje tylko `poi.json` i zostawia GPX,
 - GPX i POI zapisane razem zastępują obie dane,
 - usunięcie może usunąć trasę i POI, gdy któryś plik nie istnieje.
+- archiwizacja przenosi bieżący GPX bez zmiany zawartości do `gpx-history/`,
+  zapisuje jego tytuł i długość w `gpx-history/routes.json` oraz usuwa POI,
+  zachowując ich poprzednią wersję jako `.prev`.
 
 ## Uruchomienie lokalne
 

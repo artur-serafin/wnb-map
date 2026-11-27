@@ -16,6 +16,7 @@ flowchart LR
     I[ingest-SEKRET.php]
     L[(live/latest.json)]
     D[(data/WnB.gpx<br/>data/poi.json)]
+    H[(gpx-history/*.gpx<br/>routes.json)]
     S[index.html + config.js + lang/*.json]
     UP[upload-SEKRET.php]
   end
@@ -24,6 +25,7 @@ flowchart LR
   end
   T -- "HTTPS POST co ~25 m ruchu" --> I --> L
   U --> UP --> D
+  UP --> H
   B -- "co 8 s" --> L
   B -- "raz przy otwarciu" --> D
   B --> S
@@ -40,9 +42,10 @@ Cechy: brak logowania Uczestników, brak bazy danych, pozycje Uczestników nigdz
 | Traccar Client | aplikacja iOS (darmowa) | wysyła pozycję WnB w tle: High, Distance 25 m, bufor offline, heartbeat co ok. 5 min na postoju |
 | `ingest-<sekret>.php` | PHP | przyjmuje POST, waliduje, aktualizuje `live/latest.json` |
 | `live/latest.json` | plik statyczny | bieżąca pozycja i ogon 120 s |
-| `upload-<sekret>.php` | PHP | formularz wgrywania/usuwania trasy i POI, walidacja, kopie `.prev` |
+| `upload-<sekret>.php` | PHP | formularz wgrywania, usuwania i archiwizacji trasy/POI |
 | `update-<sekret>.php` | PHP | opcjonalny endpoint trybu edycji: verify/save POI, walidacja i atomowa podmiana |
 | `data/WnB.gpx`, `data/poi.json` | pliki statyczne | bieżąca trasa i punkty |
+| `gpx-history/*.gpx`, `gpx-history/routes.json` | pliki statyczne | archiwum tras i indeks JSON z nazwą oraz długością |
 | `index.html` + `config.js` + `lang/*.json` | HTML/JS, Leaflet 1.9.4 | cała logika po stronie przeglądarki |
 | `.htaccess` | Apache | brak listingu, blokada `*.lock/.tmp/.log/.prev`, `nosniff`, `no-cache` dla `latest.json` |
 | Hosting | OVH Personal (Apache, PHP 8.5, FTP, SSL) | bez CDN, bez procesów w tle |
@@ -61,6 +64,8 @@ Zewnętrzne zależności: kafelki OpenStreetMap (bez gwarancji dostępności, wy
 **Strona.** Po otwarciu: język, trasa (`data/WnB.gpx`, pierwszy `trk`, kolejne identyczne punkty pomijane) i punkty POI niezależnie od obecności trasy. Startuje lokalizacja Uczestnika. Potem co 8 s pobranie `latest.json` (`?t=…`, `cache: no-store`); wiek pozycji liczony względem czasu serwera z nagłówka `Date`, a nie zegara telefonu. Pojedynczy błąd pobrania jest ignorowany, komunikat o braku połączenia po 2 z rzędu.
 
 **Trasa i POI.** `upload` waliduje plik przed zapisem (poprawny XML, `trk` z ≥ 2 różnymi punktami, współrzędne, ≤ 5000 punktów, ≤ 2 MB, brak DOCTYPE/ENTITY; POI: lista, znany typ, pozycja, opcjonalny `km`), kopiuje poprzednią wersję do `.prev` i podmienia plik atomowo. Zapisanie samego POI zastępuje tylko `poi.json` i zostawia GPX. Zapisanie GPX zastępuje trasę i usuwa dotychczasowe POI, ponieważ stare punkty mogą nie odpowiadać nowej mapie. Usunięcie usuwa oba pliki. Brak pliku trasy (404) jest stanem celowym: mapa nadal może pokazywać POI, bez kilometra trasy i ETA.
+
+**Historia tras.** Akcja archiwizacji odczytuje z bieżącego GPX tytuł i długość, po czym przenosi plik bez zmiany jego zawartości do `gpx-history/`. Dopisuje do `routes.json` wpis z samą nazwą pliku, tytułem i długością w kilometrach; klient zna folder historii, a nazwa pliku jest jego stałym identyfikatorem. Indeks jest listą obiektów JSON, więc można rozszerzać wpisy o kolejne pola; przy archiwizacji istniejące pola są zachowywane. Przy kolizji nazwy dodawany jest suffix `-1`, `-2` itd. POI są usuwane tak jak przy zwykłym usunięciu, czyli zachowywane w `.prev`. Pliki GPX w historii pozostają dostępne pod ich publicznymi ścieżkami HTTP.
 
 ## 4. Logika po stronie przeglądarki (wszystko w `index.html`)
 
