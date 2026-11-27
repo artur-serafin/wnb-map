@@ -13,7 +13,7 @@ const CONFIG = {
   POI_URL: 'data/poi.json',         // plik z punktami POI
   UPDATE_URL_TEMPLATE: 'update-{secret}.php', // szablon; {secret} zastępuje wartość ?s=SEKRET
   NO_ROUTE_TITLE: 'Wtorek na Bulwarach', // tytuł trasy, gdy nie ma pliku GPX (np. w trakcie tworzenia trasy)
-  IDLE_USE_SEASONAL_NOTICE: false,    // true = komunikat dla okresu zimowego
+  IDLE_USE_SEASONAL_NOTICE: true,    // true = komunikat dla okresu zimowego
   LIVE_URL: 'live/latest.json',     // plik z pozycją WnB, tworzony przez skrypt ingest
   LANG_DIR: 'lang/',                // folder z plikami językowymi
   STATUS_FADE_MS: 250,              // czas pojawiania i zanikania statusu (ms)

@@ -8,7 +8,7 @@
   "TITLE_JOIN_WITH_ROUTE": "Dołącz do nas: {title} – {distance}",
   "IDLE_NOTICE_INTRO": "Najbliższa trasa nie została jeszcze opublikowana.",
   "IDLE_NOTICE_STANDARD": "Trasa zwykle pojawia się 1–2 dni przed przejazdem.",
-  "IDLE_NOTICE_SEASONAL": "W okresie zimowym nie planujemy trasy, będziemy publikować aktualną pozycję.",
+  "IDLE_NOTICE_SEASONAL": "W okresie zimowym nie planujemy trasy. W trakcie przejazdu będziemy publikować aktualną pozycję.",
   "IDLE_NOTICE_START": "Najbliższy start: Wtorek, 19:00, Pomnik Syreny nad Wisłą.",
   "HISTORY_CTA": "Zobacz poprzednie trasy WnB",
   "HISTORY_MENU_TITLE": "Zobacz poprzednie trasy WnB",

@@ -8,7 +8,7 @@
   "TITLE_JOIN_WITH_ROUTE": "Join us: {title} – {distance}",
   "IDLE_NOTICE_INTRO": "The next route has not been published yet.",
   "IDLE_NOTICE_STANDARD": "Routes are usually published 1–2 days before the ride.",
-  "IDLE_NOTICE_SEASONAL": "We do not plan a route during winter; we will publish our current location.",
+  "IDLE_NOTICE_SEASONAL": "We do not plan a route during winter. We will publish our current location during the ride.",
   "IDLE_NOTICE_START": "Next start: Tuesday, 7:00 PM, Mermaid Statue by the Vistula.",
   "HISTORY_CTA": "Browse previous WnB routes",
   "HISTORY_MENU_TITLE": "Browse previous WnB routes",
