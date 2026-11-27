@@ -483,15 +483,20 @@ map.createPane('arrowPane').style.zIndex = 395;   // strzałki kierunku nad tras
 map.createPane('beamPane').style.zIndex = 399;    // wskaźnik kierunku ruchu Uczestnika pod jego kropką
 L.tileLayer(C.TILE_URL, { maxZoom: C.MAX_ZOOM, attribution: C.TILE_ATTRIBUTION }).addTo(map);
 let routeBounds = null, routePts = [], routeCum = [], startMarker = null, finishMarker = null;
-let routeState = 'loading', routeTitle = C.NO_ROUTE_TITLE || '', routeDistance = '';
+let routeState = 'loading', routeTitle = C.NO_ROUTE_TITLE || '', routeDistance = '', routeDistanceKm = null;
 const focus = ll => map.setView(ll, Math.max(map.getZoom(), C.FOCUS_ZOOM));
 
 function renderPageState() {
   if (!lang) return;
+  if (routeDistanceKm != null) routeDistance = formatDistanceKm(routeDistanceKm);
   if (historyMode) {
-    const historyTitle = historyListMode
+    let historyTitle = historyListMode
       ? (T.HISTORY_TITLE || 'WnB – Zobacz poprzednie trasy')
       : (historyEntry ? historyEntry.title : (T.HISTORY_LOADING || ''));
+    if (!historyListMode && historyEntry) {
+      const distance = routeDistance || formatDistanceKm(historyEntry.distanceKm);
+      historyTitle = historyEntry.title + ' – ' + distance;
+    }
     $('title').textContent = historyTitle;
     document.title = historyTitle;
     $('idleNotice').hidden = true;
@@ -535,6 +540,9 @@ function km(a, b) {
   const h = Math.sin(dLat / 2) ** 2 + Math.cos(a[0] * rad) * Math.cos(b[0] * rad) * Math.sin(dLon / 2) ** 2;
   return 2 * R * Math.asin(Math.sqrt(h));
 }
+function formatDistanceKm(distanceKm) {
+  return distanceKm.toLocaleString(lang || 'pl', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' km';
+}
 function formIdx(n) {
   if (lang === 'pl') { const m10 = n % 10, m100 = n % 100; return n === 1 ? 0 : (m10 >= 2 && m10 <= 4 && (m100 < 10 || m100 >= 20)) ? 1 : 2; }
   return n === 1 ? 0 : 2;
@@ -547,8 +555,12 @@ function fmtAgo(s) {
 // ---------- trasa ----------
 async function noRoute(historical) {   // przejazd bez trasy: pokazujemy mapę i POI, bez ETA i kilometra trasy
   routeState = 'none';
-  routeTitle = C.NO_ROUTE_TITLE || '';
-  if (routeTitle) document.title = routeTitle;
+  routeTitle = historical && historyEntry ? historyEntry.title : (C.NO_ROUTE_TITLE || '');
+  routeDistanceKm = historical && historyEntry ? historyEntry.distanceKm : null;
+  routeDistance = historical && historyEntry ? formatDistanceKm(historyEntry.distanceKm) : '';
+  if (routeTitle) document.title = historical && historyEntry
+    ? routeTitle + ' – ' + routeDistance
+    : routeTitle;
   $('btnFit').hidden = true;   // przycisk "Cała trasa" nie ma wtedy sensu
   if (!historical) await loadPoi();
   renderPageState();
@@ -581,7 +593,8 @@ async function loadRoute(url, historicalEntry) {
     routePts = pts;
     routeState = 'available';
     routeTitle = name;
-    routeDistance = total.toFixed(1).replace('.', ',') + ' km';
+    routeDistanceKm = total;
+    routeDistance = formatDistanceKm(total);
     const line = L.polyline(pts, { color: COL.route, weight: C.ROUTE_WIDTH, opacity: .9, pane: 'routePane' }).addTo(map);
     addStartFinish(pts);
     routeBounds = line.getBounds();
@@ -589,7 +602,7 @@ async function loadRoute(url, historicalEntry) {
     prepRoute(); drawArrows(); updateFar();
     if (!historical) await loadPoi();
     updateProgress(); renderEta();
-    document.title = name;
+    document.title = historical ? name + ' – ' + routeDistance : name;
     renderPageState();
   } catch (e) {
     routeState = 'error'; renderPageState();
