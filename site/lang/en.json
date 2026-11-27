@@ -48,6 +48,7 @@
   "ROUTE_ERROR": "Could not load the route",
   "BTN_ZOOM_IN": "Zoom in",
   "BTN_ZOOM_OUT": "Zoom out",
+  "BTN_DOWNLOAD": "Download GPX",
   "BTN_FIT": "Whole route",
   "BTN_ORG": "Show {name}",
   "BTN_ME": "Show my location",

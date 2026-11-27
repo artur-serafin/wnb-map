@@ -18,6 +18,7 @@ const CONFIG = {
   LANG_DIR: 'lang/',                // folder z plikami językowymi
   STATUS_FADE_MS: 250,              // czas pojawiania i zanikania statusu (ms)
   STATUS_TEMPORARY_MS: 2000,        // czas widoczności statusu tymczasowego (ms)
+  SPLASH_INTERVAL_MINUTES: 5,       // przerwa między ekranami startowymi; 0 = zawsze, 'infinity' = raz na sesję karty
   SPLASH_HOLD_MS: 1500,              // ile ms ekran startowy pozostaje na pełnym ekranie
   SPLASH_FADE_MS: 1000,             // czas zanikania ekranu startowego
   // UWAGA: długość ogona (ile sekund historii) ustawiasz po stronie serwera,

@@ -15,8 +15,9 @@ dotarcia do kolejnych punktów.
 - tryb edycji POI aktywowany osobnym sekretem,
 - upload i usuwanie GPX oraz POI,
 - archiwizacja tras do plików GPX z indeksem JSON,
+- pobieranie wyświetlanej trasy GPX z nazwą pliku opartą na jej tytule,
 - interfejs PL/EN i powiadomienia mobilne.
-- ekran startowy z logo, z konfigurowalnymi czasami pełnego widoku i zanikania.
+- ekran startowy z logo, z konfigurowalnym odstępem między pokazaniami, czasem pełnego widoku i zanikania.
 
 ## Struktura
 

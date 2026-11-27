@@ -48,6 +48,7 @@
   "ROUTE_ERROR": "Nie udało się wczytać trasy",
   "BTN_ZOOM_IN": "Przybliż",
   "BTN_ZOOM_OUT": "Oddal",
+  "BTN_DOWNLOAD": "Pobierz GPX",
   "BTN_FIT": "Cała trasa",
   "BTN_ORG": "Pokaż {name}",
   "BTN_ME": "Pokaż moją pozycję",

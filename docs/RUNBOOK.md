@@ -179,6 +179,7 @@ Wszystkie ustawienia mają komentarze w pliku. Najczęściej zmieniane:
 | `SHOW_GLOW`, `GLOW_SHOW_DISTANCE` | true, false | poświata w stronę WnB i napis z odległością |
 | `SHOW_COMPASS`, `COMPASS_DECLINATION_DEG` | true, 7 | kompas Uczestnika, poprawka na północ geograficzną |
 | `TILE_URL` | OSM | źródło map (zmiana, gdy OSM zablokuje dostęp) |
+| `SPLASH_INTERVAL_MINUTES` | 5 | odstęp między ekranami startowymi; `0` = przy każdym wejściu, `'infinity'` = raz na sesję karty |
 | `SPLASH_HOLD_MS` | 500 | ile ms logo pozostaje na pełnym ekranie przed zanikiem |
 | `SPLASH_FADE_MS` | 1000 | czas animacji zanikania ekranu startowego |
 

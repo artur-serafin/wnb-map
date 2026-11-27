@@ -9,6 +9,38 @@ if (window.location.protocol === 'http:') {
   window.location.replace('https://' + window.location.host + window.location.pathname + window.location.search + window.location.hash);
 }
 </script>
+<script src="config.js"></script>
+<script>
+(function () {
+  const intervalMinutes = CONFIG.SPLASH_INTERVAL_MINUTES;
+  const storageKey = 'wnbSplashLastEntry';
+  let shouldShow = true;
+  try {
+    if (intervalMinutes !== 'infinity' &&
+        (typeof intervalMinutes !== 'number' || !Number.isFinite(intervalMinutes) || intervalMinutes < 0)) {
+      throw new Error('SPLASH_INTERVAL_MINUTES must be a non-negative number or "infinity".');
+    }
+
+    const previousEntry = sessionStorage.getItem(storageKey);
+    const now = Date.now();
+    if (intervalMinutes === 'infinity') {
+      shouldShow = previousEntry === null;
+      sessionStorage.setItem(storageKey, 'shown');
+    } else {
+      const previousEntryAt = previousEntry === null ? NaN : Number(previousEntry);
+      shouldShow = intervalMinutes === 0 ||
+        !Number.isFinite(previousEntryAt) ||
+        now < previousEntryAt ||
+        now - previousEntryAt >= intervalMinutes * 60 * 1000;
+      sessionStorage.setItem(storageKey, String(now));
+    }
+  } catch (error) {
+    console.error('Could not determine splash timing; showing splash.', error);
+    shouldShow = true;
+  }
+  if (shouldShow) document.documentElement.classList.add('showSplash');
+})();
+</script>
 <title>Wtorek na Bulwarach — przejazdy rolkowe</title>
 <meta name="description" content="Wspólne przejazdy rolkowe w Warszawie. Dołącz do Wtorku na Bulwarach.">
 <meta name="theme-color" content="#14213d">
@@ -25,7 +57,8 @@ if (window.location.protocol === 'http:') {
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
 <style>
   html, body { height: 100%; margin: 0; }
-  #splash { position: fixed; inset: 0; z-index: 2000; display: grid; place-items: center; background: #14213d; opacity: 1; pointer-events: auto; transition-property: opacity; transition-timing-function: linear; }
+  #splash { position: fixed; inset: 0; z-index: 2000; display: none; place-items: center; background: #14213d; opacity: 1; pointer-events: auto; transition-property: opacity; transition-timing-function: linear; }
+  html.showSplash #splash { display: grid; }
   #splash img { width: min(72vw, 72vh); height: min(72vw, 72vh); object-fit: contain; }
   #splash.splashDone { opacity: 0; pointer-events: none; }
   body { display: flex; flex-direction: column; font: 16px/1.4 system-ui, sans-serif; }
@@ -51,12 +84,13 @@ if (window.location.protocol === 'http:') {
   #idleNotice p { margin: .35rem 0; }
   #idleNotice p:first-child { font-weight: 700; }
   #idleHistoryLink { display: inline-block; margin-top: .55rem; color: #ffcf52; font-weight: 700; pointer-events: auto; }
-  .historyView { position: absolute; inset: 0; z-index: 1100; overflow-y: auto; -webkit-overflow-scrolling: touch; background: rgba(20,33,61,.62); color: #fff; }
+  .historyView { position: absolute; inset: 0; z-index: 1100; overflow-y: auto; -webkit-overflow-scrolling: touch; color: #fff; }
   .historyView[hidden] { display: none; }
-  .historyPanel { box-sizing: border-box; width: min(100%, 760px); min-height: 100%; margin: 0 auto; padding: .8rem 1rem calc(1.25rem + env(safe-area-inset-bottom, 0px)); background: rgba(20,33,61,.18); }
-  .historyNav { position: sticky; top: -.8rem; z-index: 1; display: flex; justify-content: space-between; gap: .75rem; margin: -.8rem -1rem 1rem; padding: .7rem 1rem; background: rgba(14,24,48,.96); border-bottom: 1px solid rgba(255,255,255,.14); }
+  .historyPanel { box-sizing: border-box; width: min(100%, 760px); min-height: 100%; margin: 0 auto; padding: .8rem 1rem calc(1.25rem + env(safe-area-inset-bottom, 0px)); background: rgba(20,33,61,.62); }
+  .historyNav { position: sticky; top: 0; z-index: 1; display: flex; justify-content: space-between; gap: .75rem; margin: -.8rem -1rem 1rem; padding: .7rem 1rem; background: rgba(14,24,48,.60); border-bottom: 1px solid rgba(255,255,255,.14); }
   .historyNav a { color: #ffcf52; font-size: .9rem; font-weight: 700; text-decoration: none; }
   .historyNav a[hidden] { display: none; }
+  #historyExit { margin-left: auto; }
   .historyHeading { margin: .5rem 0 .35rem; font-size: 1.1rem; }
   .historyDescription { margin: 0 0 .9rem; color: rgba(255,255,255,.78); font-size: .9rem; }
   .historySearch { width: 100%; box-sizing: border-box; margin: 0 0 .8rem; padding: .7rem .8rem; border: 1px solid rgba(255,255,255,.38); border-radius: 10px; background: rgba(255,255,255,.96); color: #14213d; font: inherit; }
@@ -76,8 +110,7 @@ if (window.location.protocol === 'http:') {
   body.historyMode:not(.historyListMode) .historyPanel { min-height: 0; background: transparent; pointer-events: none; }
   body.historyMode:not(.historyListMode) .historyNav, body.historyMode:not(.historyListMode) .historyMessage { pointer-events: auto; }
   @media (min-width: 760px) {
-    .historyPanel { min-height: calc(100% - 2rem); margin: 1rem auto; border: 1px solid rgba(255,255,255,.15); border-radius: 16px; }
-    .historyNav { top: -0.8rem; }
+    .historyPanel { min-height: calc(100% - 2rem); margin: 0 auto 1rem auto; border-radius: 0 0 16px 16px; }
     body.historyMode:not(.historyListMode) .historyPanel { margin: 0 auto; border: 0; border-radius: 0; }
   }
   .fabs { position: absolute; right: calc(12px + env(safe-area-inset-right, 0px)); bottom: calc(12px + env(safe-area-inset-bottom, 0px)); z-index: 1000; display: flex; flex-direction: column; gap: 8px; }
@@ -186,6 +219,7 @@ if (window.location.protocol === 'http:') {
     <a id="idleHistoryLink" href="?history=list"></a>
   </div>
   <div class="fabs">
+    <a class="fab" id="btnDownload" download hidden><svg viewBox="0 0 24 24"><path d="M12 3v12m0 0 5-5m-5 5-5-5M4 20h16"/></svg></a>
     <button class="fab" id="btnIn"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
     <button class="fab" id="btnOut"><svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
     <div class="gap"></div>
@@ -253,7 +287,6 @@ if (window.location.protocol === 'http:') {
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
-<script src="config.js"></script>
 <script>
 const C = CONFIG, COL = C.COLORS;
 const $ = id => document.getElementById(id);
@@ -340,7 +373,7 @@ async function setLang(code, save) {
 }
 function applyTexts() {
   document.documentElement.lang = lang;
-  [['btnIn', T.BTN_ZOOM_IN], ['btnOut', T.BTN_ZOOM_OUT], ['btnFit', T.BTN_FIT],
+  [['btnDownload', T.BTN_DOWNLOAD], ['btnIn', T.BTN_ZOOM_IN], ['btnOut', T.BTN_ZOOM_OUT], ['btnFit', T.BTN_FIT],
    ['btnOrg', fill(T.BTN_ORG)], ['btnMe', T.BTN_ME], ['btnMenu', T.BTN_MENU],
    ['btnSaveEdit', T.BTN_SAVE], ['btnCloseEdit', T.BTN_CLOSE_EDIT]]
     .forEach(([id, t]) => { $(id).setAttribute('aria-label', t || ''); $(id).title = t || ''; });
@@ -484,10 +517,17 @@ map.createPane('beamPane').style.zIndex = 399;    // wskaźnik kierunku ruchu Uc
 L.tileLayer(C.TILE_URL, { maxZoom: C.MAX_ZOOM, attribution: C.TILE_ATTRIBUTION }).addTo(map);
 let routeBounds = null, routePts = [], routeCum = [], startMarker = null, finishMarker = null;
 let routeState = 'loading', routeTitle = C.NO_ROUTE_TITLE || '', routeDistance = '', routeDistanceKm = null;
+let routeGpxUrl = null;
 const focus = ll => map.setView(ll, Math.max(map.getZoom(), C.FOCUS_ZOOM));
 
 function renderPageState() {
   if (!lang) return;
+  const downloadButton = $('btnDownload');
+  downloadButton.hidden = routeState !== 'available' || !routeGpxUrl || (historyMode && historyListMode);
+  if (!downloadButton.hidden) {
+    downloadButton.href = routeGpxUrl;
+    downloadButton.download = routeDownloadFilename(routeTitle);
+  }
   if (routeDistanceKm != null) routeDistance = formatDistanceKm(routeDistanceKm);
   if (historyMode) {
     let historyTitle = historyListMode
@@ -543,6 +583,16 @@ function km(a, b) {
 function formatDistanceKm(distanceKm) {
   return distanceKm.toLocaleString(lang || 'pl', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' km';
 }
+function routeDownloadFilename(title) {
+  const safeTitle = (title || '')
+    .trim()
+    .replace(/[<>:"/\\|?*\u0000-\u001f]/g, '-')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/\.gpx$/i, '')
+    .replace(/^[.-]+|[.-]+$/g, '');
+  return (safeTitle || 'trasa') + '.gpx';
+}
 function formIdx(n) {
   if (lang === 'pl') { const m10 = n % 10, m100 = n % 100; return n === 1 ? 0 : (m10 >= 2 && m10 <= 4 && (m100 < 10 || m100 >= 20)) ? 1 : 2; }
   return n === 1 ? 0 : 2;
@@ -555,6 +605,7 @@ function fmtAgo(s) {
 // ---------- trasa ----------
 async function noRoute(historical) {   // przejazd bez trasy: pokazujemy mapę i POI, bez ETA i kilometra trasy
   routeState = 'none';
+  routeGpxUrl = null;
   routeTitle = historical && historyEntry ? historyEntry.title : (C.NO_ROUTE_TITLE || '');
   routeDistanceKm = historical && historyEntry ? historyEntry.distanceKm : null;
   routeDistance = historical && historyEntry ? formatDistanceKm(historyEntry.distanceKm) : '';
@@ -568,6 +619,7 @@ async function noRoute(historical) {   // przejazd bez trasy: pokazujemy mapę i
 async function loadRoute(url, historicalEntry) {
   const historical = !!historicalEntry;
   url = url || C.GPX_URL;
+  routeGpxUrl = null;
   try {
     const res = await fetch(url, { cache: 'no-cache' });
     if (res.status === 404) {
@@ -593,6 +645,7 @@ async function loadRoute(url, historicalEntry) {
     routePts = pts;
     routeState = 'available';
     routeTitle = name;
+    routeGpxUrl = url;
     routeDistanceKm = total;
     routeDistance = formatDistanceKm(total);
     const line = L.polyline(pts, { color: COL.route, weight: C.ROUTE_WIDTH, opacity: .9, pane: 'routePane' }).addTo(map);
@@ -605,7 +658,7 @@ async function loadRoute(url, historicalEntry) {
     document.title = historical ? name + ' – ' + routeDistance : name;
     renderPageState();
   } catch (e) {
-    routeState = 'error'; renderPageState();
+    routeState = 'error'; routeGpxUrl = null; renderPageState();
     if (historical) {
       console.error('history route', e);
       renderHistoryMessage(T.HISTORY_ROUTE_ERROR || '');
@@ -668,9 +721,9 @@ function restoreHistoryScroll(query) {
 function renderHistoryList(routes) {
   const content = $('historyContent');
   content.textContent = '';
-  const heading = document.createElement('h2');
-  heading.className = 'historyHeading';
-  heading.textContent = T.HISTORY_TITLE || '';
+  //const heading = document.createElement('h2');
+  //heading.className = 'historyHeading';
+  //heading.textContent = T.HISTORY_TITLE || '';
   const description = document.createElement('p');
   description.className = 'historyDescription';
   description.textContent = T.HISTORY_DESCRIPTION || '';
@@ -688,7 +741,7 @@ function renderHistoryList(routes) {
   message.setAttribute('role', 'status');
   message.setAttribute('aria-live', 'polite');
   message.hidden = true;
-  content.append(heading, description, search, list, message);
+  content.append(description, search, list, message);
 
   const collator = new Intl.Collator('pl', { numeric: true, sensitivity: 'base' });
   const sorted = routes.slice().sort((a, b) => collator.compare(b.file, a.file));
@@ -1621,6 +1674,10 @@ $('btnMe').onclick = () => { startCompass(); if (meMarker) focus(meMarker.getLat
 function showSplash() {
   const splash = $('splash');
   if (!splash) return;
+  if (!document.documentElement.classList.contains('showSplash')) {
+    splash.remove();
+    return;
+  }
   const hold = Math.max(0, Number(C.SPLASH_HOLD_MS) || 0);
   const fade = Math.max(0, Number(C.SPLASH_FADE_MS) || 0);
   splash.style.transitionDuration = fade + 'ms';
